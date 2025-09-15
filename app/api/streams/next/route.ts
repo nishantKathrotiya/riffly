@@ -28,7 +28,10 @@ export async function GET() {
       userId: user.id,
       played: false,
     },
-    orderBy: [{ upvotes: "desc" }, { createAt: "asc" }],
+    orderBy: [
+      { upvotes: { _count: "desc" } }, // Sort by count of upvotes (descending)
+      { createAt: "asc" }, // Then by creation date (ascending)
+    ],
   });
   console.log("after first call");
   console.log(mostUpvotedStream?.id);

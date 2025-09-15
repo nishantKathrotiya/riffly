@@ -69,9 +69,9 @@ export async function POST(req: NextRequest) {
         }
       );
     }
-    console.log("Extracted ID For Video", extractedId);
-    const res = await youtubesearchapi.GetVideoDetails(extractedId);
-    console.log(res);
+
+    // const res = await youtubesearchapi.GetVideoDetails(extractedId);
+    const res = await getVideoInfo(extractedId);
 
     // Check if the user is not the creator
     if (user.id !== data.creatorId) {
@@ -135,7 +135,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const thumbnails = res.thumbnail.thumbnails;
+    const thumbnails = res?.thumbnails;
     thumbnails.sort((a: { width: number }, b: { width: number }) =>
       a.width < b.width ? -1 : 1
     );
@@ -166,12 +166,10 @@ export async function POST(req: NextRequest) {
         type: "Youtube",
         title: res?.title ?? "Can't find video",
         smallImg:
-          (thumbnails.length > 1
-            ? thumbnails[thumbnails.length - 2].url
-            : thumbnails[thumbnails.length - 1].url) ??
+          (thumbnails.length > 1 ? thumbnails[2].url : thumbnails[2].url) ??
           "https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg",
         bigImg:
-          thumbnails[thumbnails.length - 1].url ??
+          thumbnails[2].url ??
           "https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg",
       },
     });
@@ -270,4 +268,28 @@ export async function GET(req: NextRequest) {
     creatorId,
     isCreator,
   });
+}
+
+async function getVideoInfo(videoId: string) {
+  const oEmbedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
+  const response = await fetch(oEmbedUrl);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch oEmbed data: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+
+  const baseThumbUrl = `https://img.youtube.com/vi/${videoId}`;
+
+  return {
+    title: data.title,
+    thumbnails: [
+      { url: `${baseThumbUrl}/default.jpg`, width: 120 },
+      { url: data.thumbnail_url, width: 480 },
+      { url: `${baseThumbUrl}/maxresdefault.jpg`, width: 1280 },
+    ],
+    channel_name: data.author_name,
+    channel_url: data.author_url,
+  };
 }
