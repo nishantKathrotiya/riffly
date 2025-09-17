@@ -26,12 +26,6 @@ const handler = NextAuth({
       } catch (e) {}
       return true;
     },
-    async redirect({ url, baseUrl }) {
-      // Allow only relative URLs or same-origin absolute URLs
-      if (url.startsWith("/")) return `${baseUrl}${url}`;
-      if (new URL(url).origin === baseUrl) return url;
-      return baseUrl;
-    },
   },
 });
 
