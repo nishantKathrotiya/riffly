@@ -230,6 +230,11 @@ export async function GET(req: NextRequest) {
         played: false,
       },
       include: {
+        user: {
+          select: {
+            email: true, 
+          },
+        },
         _count: {
           select: {
             upvotes: true,

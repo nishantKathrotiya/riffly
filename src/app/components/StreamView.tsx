@@ -34,6 +34,7 @@ interface Video {
   userId: string;
   upvotes: number;
   haveUpvoted: boolean;
+  user: { email: string };
 }
 
 interface CustomSession extends Session {
@@ -301,38 +302,47 @@ export default function StreamView({
                       alt={`Thumbnail for ${video.title}`}
                       className="w-30 h-20 object-cover rounded"
                     />
-                    <div className="flex-grow">
-                      <h3 className="font-semibold text-white">
-                        {video.title}
-                      </h3>
-                      <div className="flex items-center space-x-2 mt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            handleVote(video.id, !video.haveUpvoted)
-                          }
-                          className="flex items-center space-x-1 bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
-                        >
-                          {video.haveUpvoted ? (
-                            <ChevronDown className="h-4 w-4" />
-                          ) : (
-                            <ChevronUp className="h-4 w-4" />
-                          )}
-                          <span>{video.upvotes}</span>
-                        </Button>
+                    <div className="flex flex-col w-full">
+                      <div className="flex flex-row">
+                        <div className="flex-grow">
+                          <h3 className="font-semibold text-white">
+                            {video.title}
+                          </h3>
+                          <div className="flex items-end space-x-2 mt-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                handleVote(video.id, !video.haveUpvoted)
+                              }
+                              className="flex items-center space-x-1 bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
+                            >
+                              {video.haveUpvoted ? (
+                                <ChevronDown className="h-4 w-4" />
+                              ) : (
+                                <ChevronUp className="h-4 w-4" />
+                              )}
+                              <span>{video.upvotes}</span>
+                            </Button>
+                          </div>
+                        </div>
+                        {isCreator && (
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => removeSong(video.id)}
+                              className="bg-red-600 hover:bg-red-700 text-white"
+                            >
+                              Remove
+                            </Button>
+                          </>
+                        )}
                       </div>
+                      <p className="text-gray-400 text-xs text-right h-[10%]">
+                        Added by : {video?.user?.email}
+                      </p>
                     </div>
-                    {isCreator && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeSong(video.id)}
-                        className="bg-red-600 hover:bg-red-700 text-white"
-                      >
-                        Remove
-                      </Button>
-                    )}
                   </CardContent>
                 </Card>
               ))}
