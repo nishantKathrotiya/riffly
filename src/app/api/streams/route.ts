@@ -122,11 +122,11 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      if (recentStreams.length >= 5) {
+      if (userStreams.length >= 10) {
         return NextResponse.json(
           {
             message:
-              "Rate limit exceeded: You can only add 5 songs per 10 minutes",
+              "Rate limit exceeded: You can only add 10 songs per 10 minutes",
           },
           {
             status: 429,
