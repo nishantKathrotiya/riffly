@@ -35,6 +35,7 @@ interface Video {
   upvotes: number;
   haveUpvoted: boolean;
   user: { email: string };
+  addedBy: { email: string };
 }
 
 interface CustomSession extends Session {
@@ -340,7 +341,7 @@ export default function StreamView({
                         )}
                       </div>
                       <p className="text-gray-400 text-xs text-right h-[10%]">
-                        Added by : {video?.user?.email}
+                        Added by : {video?.addedBy?.email}
                       </p>
                     </div>
                   </CardContent>

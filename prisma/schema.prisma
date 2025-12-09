@@ -14,11 +14,12 @@ datasource db {
 }
 
 model User {
-  id        String      @id @default(uuid())
-  email     String      @unique
-  provider  Provider
-  streams   Stream[]  @relation("user")
-  upvotes   Upvote[]
+  id           String      @id @default(uuid())
+  email        String      @unique
+  provider     Provider
+  streams      Stream[]    @relation("user")
+  addedStreams Stream[]    @relation("addedBy")
+  upvotes      Upvote[]
 }
 
 model Stream {
@@ -35,7 +36,9 @@ model Stream {
   createAt      DateTime      @default(now())
   upvotes       Upvote[]
   userId        String
-  user          User        @relation(fields: [userId], references: [id], name: "user")
+  user          User        @relation(fields: [userId], references: [id], name: "user", map: "user")
+  addedById     String
+  addedBy       User        @relation(fields: [addedById], references: [id], name: "addedBy", map: "addedBy")
   currentStream CurrentStream?
 }
 
@@ -62,9 +65,3 @@ enum StreamType {
 enum Provider {
   Google
 }
-
-
-
-
-
-

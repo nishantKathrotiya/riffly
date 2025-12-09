@@ -171,6 +171,7 @@ export async function POST(req: NextRequest) {
         bigImg:
           thumbnails[2].url ??
           "https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg",
+        addedById: user.id,
       },
     });
 
@@ -232,7 +233,12 @@ export async function GET(req: NextRequest) {
       include: {
         user: {
           select: {
-            email: true, 
+            email: true,
+          },
+        },
+        addedBy: {
+          select: {
+            email: true,
           },
         },
         _count: {
