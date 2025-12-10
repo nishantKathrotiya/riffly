@@ -397,6 +397,9 @@ export default function StreamView({
                             </p>
                           </>
                         )}
+                        <p className="mt-2 text-center text-sm text-gray-400">
+                          Added By : {currentVideo?.addedBy?.email}
+                        </p>
                       </div>
                     ) : (
                       <p className="text-center py-8 text-gray-400">

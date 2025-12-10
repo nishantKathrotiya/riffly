@@ -262,13 +262,21 @@ export async function GET(req: NextRequest) {
         userId: creatorId,
       },
       include: {
-        stream: true,
+        stream: {
+          include: {
+            addedBy: {
+              select: {
+                email: true,
+              },
+            },
+          },
+        },
       },
     }),
   ]);
 
   const isCreator = user.id === creatorId;
-
+  console.log(JSON.stringify(activeStream, null, 2));
   return NextResponse.json({
     streams: streams.map(({ _count, ...rest }) => ({
       ...rest,
