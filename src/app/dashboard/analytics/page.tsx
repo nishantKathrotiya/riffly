@@ -1,22 +1,10 @@
 "use client";
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Appbar } from "@/src/app/components/Appbar";
 import { Card, CardContent } from "@/src/components/ui/card";
 import { Button } from "@/src/components/ui/button";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-import {
-  getStats,
-  getWeeklyAdds,
-  getTrending,
-  getLikesGivenTop,
-  getYouAddMost,
-  getYourTopLiked,
-  getRecommendation,
-  addToQueue,
-  type ListItem,
-} from "@/src/app/dashboard/analytics/integration";
 
 import { useAnalytics } from "@/src/app/dashboard/analytics/useAnalytics";
 import StatsTiles from "@/src/app/dashboard/analytics/components/StatsTiles";
@@ -70,23 +58,6 @@ function ChartCard({
 export default function AnalyticsPage() {
   const [roomId, setRoomId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [chartLoading, setChartLoading] = useState(false);
-
-  const [trendLoading, setTrendLoading] = useState(false);
-  const [trendItems, setTrendItems] = useState<
-    { id: string; title: string; img?: string | null; right: string | number }[]
-  >([]);
-  const [likeMostLoading, setLikeMostLoading] = useState(false);
-  const [likeMostItems, setLikeMostItems] = useState<
-    { id: string; title: string; img?: string | null; right: string | number }[]
-  >([]);
-  const [youAddLoading, setYouAddLoading] = useState(false);
-  const [youAddItems, setYouAddItems] = useState<
-    { id: string; title: string; img?: string | null; right: string | number }[]
-  >([]);
-  const [yourTopLikedItems, setYourTopLikedItems] = useState<
-    { id: string; title: string; img?: string | null; right: string | number }[]
-  >([]);
 
   const {
     // data
