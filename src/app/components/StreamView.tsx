@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Card, CardContent } from "@/src/components/ui/card";
-import { ChevronUp, ChevronDown, Share2, Play } from "lucide-react";
+import { ChevronUp, ChevronDown, Share2, Play, Sparkles } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Appbar } from "./Appbar";
@@ -21,6 +21,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/src/components/ui/dialog";
+import { useRouter } from "next/navigation";
 
 interface Video {
   id: string;
@@ -56,6 +57,7 @@ export default function StreamView({
   creatorId: string;
   playVideo: boolean;
 }) {
+  const router = useRouter();
   const [inputLink, setInputLink] = useState("");
   const [queue, setQueue] = useState<Video[]>([]);
   const [currentVideo, setCurrentVideo] = useState<Video | null>(null);
@@ -258,6 +260,10 @@ export default function StreamView({
     }
   };
 
+  const handleRedirectToAnalytics = () => {
+    router.push(`/dashboard/${creatorId}/analytics`);
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-[rgb(10,10,10)] text-gray-200">
       <Appbar />
@@ -270,12 +276,23 @@ export default function StreamView({
                   Upcoming Songs
                 </h2>
                 <div className="space-x-2">
+                  {/* Analytics Redirect BTN  */}
+                  <Button
+                    onClick={handleRedirectToAnalytics}
+                    className="bg-purple-700 hover:bg-purple-800 text-white"
+                  >
+                    <Sparkles className="mr-2 w-4 h-4 " />
+                    <span>Insights</span>
+                  </Button>
+                  {/* Share BTN  */}
                   <Button
                     onClick={handleShare}
                     className="bg-purple-700 hover:bg-purple-800 text-white"
                   >
-                    <Share2 className="mr-2 h-4 w-4" /> Share
+                    <Share2 className="mr-2 h-4 w-4" />
+                    Share
                   </Button>
+                  {/* Empty Queue BTN */}
                   {isCreator && (
                     <Button
                       onClick={() => setIsEmptyQueueDialogOpen(true)}

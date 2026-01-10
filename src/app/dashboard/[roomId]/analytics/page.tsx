@@ -1,9 +1,9 @@
 "use client";
 import { Appbar } from "@/src/app/components/Appbar";
-import { useAnalytics } from "@/src/app/dashboard/analytics/useAnalytics";
-import StatsTiles from "@/src/app/dashboard/analytics/components/StatsTiles";
-import WeeklyAddsChart from "@/src/app/dashboard/analytics/components/WeeklyAddsChart";
-import ListCard from "@/src/app/dashboard/analytics/components/ListCard";
+import { useAnalytics } from "@/src/hooks/useAnalytics";
+import StatsTiles from "@/src/app/components/StatsTiles";
+import WeeklyAddsChart from "@/src/app/components/WeeklyAddsChart";
+import ListCard from "@/src/app/components/ListCard";
 import { Button } from "@/src/components/ui/button";
 import { ToastContainer } from "react-toastify";
 import { ListStart, RotateCw } from "lucide-react";

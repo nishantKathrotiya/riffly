@@ -11,7 +11,7 @@ import {
   addToQueue,
   type ListItem,
   type Recommendation,
-} from "@/src/app/dashboard/analytics/integration";
+} from "@/src/app/intigrations/integration";
 
 export function useAnalytics(roomId: string | null) {
   // Stats
