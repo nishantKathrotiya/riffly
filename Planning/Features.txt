@@ -1,0 +1,268 @@
+Absolutely 👍
+Here is a **clean, final, single-source-of-truth document** that reminds you of **exactly what features you finalized**, **what each shows**, and **how each is calculated** — aligned with your schema, performance goals, and architecture.
+
+No extra features. No removed items. No confusion.
+
+---
+
+# 🎧 RIFFLY – FINAL DASHBOARD FEATURES & CALCULATION LOGIC
+
+> **Scope:**
+> User-specific dashboard **filtered by room**, using **event-driven stats**, **no heavy recalculation**, and **one contextual recommendation**.
+
+---
+
+## 📊 STATS (User → Room Specific)
+
+### 1️⃣ Total Songs Added
+
+**Description**
+Number of unique songs the user added to this room.
+
+**Calculation**
+
+```sql
+COUNT(Stream)
+WHERE
+  Stream.addedById = userId
+  AND Stream.userId = roomId
+```
+
+**Table Used**
+
+* `Stream`
+
+**Update Trigger**
+
+* On **song addition**
+
+---
+
+### 2️⃣ Total Likes You Got
+
+**Description**
+Total upvotes received on songs added by the user in this room.
+
+**Calculation**
+
+```sql
+COUNT(Upvote)
+WHERE
+  Stream.addedById = userId
+  AND Stream.userId = roomId
+```
+
+**Tables Used**
+
+* `Upvote` → `Stream`
+
+**Update Trigger**
+
+* On **song liked**
+
+---
+
+### 3️⃣ Total Likes You Have Given
+
+**Description**
+Total likes the user has given to songs in this room.
+
+**Calculation**
+
+```sql
+COUNT(Upvote)
+WHERE
+  Upvote.userId = userId
+  AND Stream.userId = roomId
+```
+
+**Tables Used**
+
+* `Upvote` → `Stream`
+
+**Update Trigger**
+
+* On **song liked**
+
+---
+
+### 4️⃣ Average Likes per Song Added
+
+**Description**
+Average likes received per song added by the user.
+
+**Formula**
+
+```
+avgLikes = totalLikesGot / totalSongsAdded
+```
+
+**Computed**
+
+* In API (no DB write)
+
+---
+
+## 🔍 INSIGHTS
+
+### 5️⃣ Trending Songs in This Room (Top 5 / 10)
+
+**Description**
+Songs currently popular **without old context**.
+
+**Core Idea**
+
+> Trending = recent likes + recent plays, weighted by time decay.
+
+**Time Window**
+
+* Last **60–180 minutes**
+* Ignores older history automatically
+
+**Formula**
+
+```
+TrendingScore =
+  (RecentUpvotes × 2)
++ (RecentPlays × 1)
+```
+
+**Tables Used**
+
+* `RoomStreamTrending` (precomputed)
+
+**Update Triggers**
+
+* Song liked
+* Song played
+
+---
+
+### 6️⃣ Songs You Like the Most (Top 5 / 10)
+
+**Description**
+Songs the user upvoted most often in this room.
+
+**Calculation**
+
+```sql
+COUNT(Upvote)
+GROUP BY Stream.extractedId
+WHERE
+  Upvote.userId = userId
+  AND Stream.userId = roomId
+ORDER BY count DESC
+```
+
+**Tables Used**
+
+* `Upvote` → `Stream`
+
+---
+
+### 7️⃣ Songs You Add the Most (Top 5 / 10)
+
+**Description**
+Songs (by `extractedId`) the user adds repeatedly.
+
+**Calculation**
+
+```sql
+COUNT(Stream)
+GROUP BY extractedId
+WHERE
+  addedById = userId
+  AND userId = roomId
+ORDER BY count DESC
+```
+
+**Tables Used**
+
+* `Stream`
+
+---
+
+### 8️⃣ Your Songs with Most Likes (Top 5 / 10)
+
+**Description**
+Your highest-performing songs in this room.
+
+**Calculation**
+
+```sql
+COUNT(Upvote)
+GROUP BY Stream.extractedId
+WHERE
+  Stream.addedById = userId
+  AND Stream.userId = roomId
+ORDER BY count DESC
+```
+
+**Tables Used**
+
+* `Upvote` → `Stream`
+
+---
+
+## 📈 GRAPHS
+
+### 9️⃣ Weekly Song Add Activity
+
+**Description**
+Shows user contribution trend across the week.
+
+**Calculation**
+
+```sql
+COUNT(Stream)
+GROUP BY DAYOFWEEK(createdAt)
+WHERE
+  addedById = userId
+  AND userId = roomId
+```
+
+**Tables Used**
+
+* `Stream`
+
+---
+
+## 🎯 RECOMMENDATION (ONLY ONE)
+
+### 🔟 Best Song to Add Now
+
+**Description**
+Single song recommendation based on **room mood & time context**.
+
+**Inputs**
+
+* User’s past added songs
+* Similar time window (hour/day)
+* What was playing then
+* What others liked then
+* Current room activity
+
+**Candidate Filter**
+
+* Not played in last **20 minutes**
+* Not currently in queue
+
+**Scoring Formula**
+
+```
+RecommendationScore =
+  (UserSuccessScore × 0.5)
++ (RoomContextScore × 0.3)
++ (TimeSimilarityScore × 0.2)
+```
+
+**Where**
+
+* Calculated **in-memory**
+* Uses top-N prefiltered rows
+
+**Tables Used**
+
+* `Stream`
+* `Upvote`
+* `RoomStreamTrending`

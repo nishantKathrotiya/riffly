@@ -1,0 +1,225 @@
+Great question — this is **the core engineering justification** of your system.
+Below is a **clear, interview-ready, architecture-ready answer**.
+
+---
+
+# 🗄️ Database Updates We Are Introducing — And WHY
+
+Your **existing schema is correct**, but it is **not designed for fast analytics**.
+So we introduce **two small, focused tables** to avoid recomputation and DB load.
+
+---
+
+## ❌ Problem With Current Tables (Why Changes Are Needed)
+
+With only:
+
+* `Stream`
+* `Upvote`
+
+To show **stats, insights, trending**, you would need:
+
+* `COUNT(*)`
+* `GROUP BY`
+* `JOIN`
+* Time-window filtering
+
+👉 Doing this **on every dashboard refresh** =
+❌ Slow
+❌ Expensive
+❌ Not scalable
+❌ Bad for Vercel serverless
+
+---
+
+## ✅ Solution: Event-Driven Precomputation
+
+We **DO NOT modify existing tables**
+We **ADD small aggregation tables**
+
+---
+
+# 1️⃣ `UserRoomStats` (User-Level Cache)
+
+### 📌 Why We Introduce This
+
+To avoid recalculating **user stats per room** every time.
+
+Without this table:
+
+```sql
+COUNT(Stream)
+COUNT(Upvote)
+JOIN Stream + Upvote
+```
+
+With this table:
+
+```sql
+SELECT * FROM UserRoomStats
+```
+
+⚡ O(1) read
+
+---
+
+### 🧱 Table Definition
+
+```prisma
+model UserRoomStats {
+  userId          String
+  roomId          String
+  totalAdded      Int
+  totalLikesGot   Int
+  totalLikesGiven Int
+  lastUpdated     DateTime
+
+  @@id([userId, roomId])
+}
+```
+
+---
+
+### 🔄 What Updates This Table
+
+| Event                       | Update                 |
+| --------------------------- | ---------------------- |
+| Song Added                  | `totalAdded += 1`      |
+| Song Liked (by user)        | `totalLikesGiven += 1` |
+| Song Liked (on user's song) | `totalLikesGot += 1`   |
+
+✔ Updated only on events
+❌ Never recalculated on read
+
+---
+
+## 💡 Why This Is Critical
+
+* Stats load in **1 query**
+* No joins
+* No aggregation
+* No DB spikes
+
+---
+
+# 2️⃣ `RoomStreamTrending` (Room-Level Cache)
+
+---
+
+### 📌 Why We Introduce This
+
+Trending needs:
+
+* Recent likes
+* Recent plays
+* Time decay
+* Sorting
+
+Doing this live is **very expensive**.
+
+So we store **already-scored data**.
+
+---
+
+### 🧱 Table Definition
+
+```prisma
+model RoomStreamTrending {
+  id            String   @id @default(uuid())
+  roomId        String
+  streamId      String
+  extractedId   String
+  recentUpvotes Int
+  recentPlays   Int
+  trendingScore Float
+  lastUpdated   DateTime
+
+  @@index([roomId, trendingScore])
+}
+```
+
+---
+
+### 🔄 What Updates This Table
+
+| Event            | Update               |
+| ---------------- | -------------------- |
+| Song Added       | Initialize row       |
+| Song Liked       | `recentUpvotes += 1` |
+| Song Played      | `recentPlays += 1`   |
+| Periodic cleanup | Reset old context    |
+
+---
+
+### 🧮 Why We Store `trendingScore`
+
+Because:
+
+```sql
+ORDER BY trendingScore DESC LIMIT 10
+```
+
+is **10x faster** than recomputing weights every time.
+
+---
+
+## 🔥 Avoiding Old Context (Important)
+
+Old context is avoided by:
+
+* Resetting `recentUpvotes` & `recentPlays` after time window
+* Using `lastUpdated`
+* Time-decay in score formula
+
+❌ No historical pollution
+✅ Only current mood
+
+---
+
+# 3️⃣ (Optional Later) `UserSongContext` — NOT NOW
+
+❌ Not introduced now
+❌ Over-engineering
+❌ No real benefit at current scale
+
+Your current recommendation works **in-memory**.
+
+---
+
+# 4️⃣ What We DID NOT Change (Important)
+
+| Item         | Reason               |
+| ------------ | -------------------- |
+| Stream table | Already correct      |
+| Upvote table | Already normalized   |
+| Indexes      | Enough for now       |
+| Redis        | Not needed initially |
+| Cron jobs    | Optional later       |
+
+---
+
+# 5️⃣ Summary Table (Perfect for Documentation)
+
+| DB Change           | Purpose              | Benefit              |
+| ------------------- | -------------------- | -------------------- |
+| UserRoomStats       | Cache user stats     | O(1) dashboard stats |
+| RoomStreamTrending  | Cache trending logic | Fast insights        |
+| No schema mutation  | Stability            | Safe rollout         |
+| Event-based updates | Minimal compute      | Scalable             |
+
+---
+
+# 🧠 Final Engineering Justification (Use This)
+
+> “We introduce lightweight aggregation tables that are updated only on write events, transforming expensive read-time analytics into constant-time queries, ensuring fast dashboards on serverless infrastructure.”
+
+---
+
+If you want next:
+
+* 📄 ER diagram with new tables
+* 🧪 Transaction-safe update code
+* 📊 Load analysis (before vs after)
+* 🔐 Data consistency strategy
+
+Just tell me 👍

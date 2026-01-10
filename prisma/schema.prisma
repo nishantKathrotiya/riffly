@@ -40,6 +40,10 @@ model Stream {
   addedById     String
   addedBy       User        @relation(fields: [addedById], references: [id], name: "addedBy", map: "addedBy")
   currentStream CurrentStream?
+
+
+  @@index([userId, addedById])
+  @@index([userId, createAt])
 }
 
 model CurrentStream {
@@ -55,6 +59,7 @@ model Upvote {
   user      User        @relation(fields: [userId], references: [id])
   stream    Stream      @relation(fields: [streamId], references: [id], onDelete: Cascade)
   @@unique([userId, streamId])
+  @@index([streamId])
 }
 
 enum StreamType {
@@ -64,4 +69,28 @@ enum StreamType {
 
 enum Provider {
   Google
+}
+
+model UserRoomStats {
+  userId          String
+  roomId          String
+  totalAdded      Int
+  totalLikesGot   Int
+  totalLikesGiven Int
+  lastUpdated     DateTime
+
+  @@id([userId, roomId])
+}
+
+model RoomStreamTrending {
+  id            String   @id @default(uuid())
+  roomId        String
+  streamId      String
+  extractedId   String
+  recentUpvotes Int
+  recentPlays   Int
+  trendingScore Float
+  lastUpdated   DateTime
+
+  @@index([roomId, trendingScore])
 }
