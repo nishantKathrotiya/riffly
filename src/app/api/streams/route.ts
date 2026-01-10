@@ -175,6 +175,63 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Event-driven analytics updates (non-blocking best-effort)
+    try {
+      const now = new Date();
+      // 1) Increment totalAdded for the user in this room
+      await prismaClient.userRoomStats.upsert({
+        where: {
+          userId_roomId: {
+            userId: user.id,
+            roomId: data.creatorId,
+          },
+        },
+        update: {
+          totalAdded: { increment: 1 },
+          lastUpdated: now,
+        },
+        create: {
+          userId: user.id,
+          roomId: data.creatorId,
+          totalAdded: 1,
+          totalLikesGot: 0,
+          totalLikesGiven: 0,
+          lastUpdated: now,
+        },
+      });
+
+      // 2) Initialize trending row for this stream
+      await prismaClient.roomStreamTrending.upsert({
+        where: {
+          // No unique on (roomId, streamId), so emulate with id via find/create
+          // We upsert by creating a deterministic id fallback is not possible; instead do: if not found, create
+          // Use a composite via findFirst+create alternative
+          id: stream.id, // fallback: ensure unique via stream.id as id when created
+        },
+        update: {
+          roomId: data.creatorId,
+          streamId: stream.id,
+          extractedId: stream.extractedId,
+          recentUpvotes: 0,
+          recentPlays: 0,
+          trendingScore: 0,
+          lastUpdated: now,
+        },
+        create: {
+          id: stream.id,
+          roomId: data.creatorId,
+          streamId: stream.id,
+          extractedId: stream.extractedId,
+          recentUpvotes: 0,
+          recentPlays: 0,
+          trendingScore: 0,
+          lastUpdated: now,
+        },
+      });
+    } catch (err) {
+      console.error("Analytics init failed for stream add", err);
+    }
+
     return NextResponse.json({
       ...stream,
       hasUpvoted: false,

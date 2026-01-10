@@ -5,7 +5,7 @@
  Adjust in a future migration if per-upvote timestamps are added.
 */
 
-const { PrismaClient } = require("@prisma/client");
+import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 // Trending window in milliseconds (3 hours)
@@ -147,12 +147,9 @@ async function main() {
 
   for (const roomId of rooms) {
     console.log(`Backfilling room ${roomId} ...`);
-    await prisma.$transaction(async (tx) => {
-      // Use tx for future per-room transactional consistency if desired
-      // For now, use prisma directly for simplicity within this scope
-      await backfillUserRoomStats(roomId);
-      await backfillRoomTrending(roomId);
-    });
+
+    await backfillUserRoomStats(roomId);
+    await backfillRoomTrending(roomId);
   }
 
   console.log("Backfill complete.");

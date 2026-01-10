@@ -61,6 +61,43 @@ export async function GET() {
     }),
   ]);
 
+  // Update trending for the played stream
+  try {
+    if (mostUpvotedStream?.id) {
+      const t = await prismaClient.roomStreamTrending.findUnique({
+        where: { id: mostUpvotedStream.id },
+      });
+      const currentUp = t?.recentUpvotes ?? 0;
+      const currentPlays = t?.recentPlays ?? 0;
+      const nextPlays = currentPlays + 1;
+      const newScore = currentUp * 2 + nextPlays;
+
+      await prismaClient.roomStreamTrending.upsert({
+        where: { id: mostUpvotedStream.id },
+        update: {
+          roomId: user.id,
+          streamId: mostUpvotedStream.id,
+          extractedId: mostUpvotedStream.extractedId,
+          recentPlays: nextPlays,
+          trendingScore: newScore,
+          lastUpdated: new Date(),
+        },
+        create: {
+          id: mostUpvotedStream.id,
+          roomId: user.id,
+          streamId: mostUpvotedStream.id,
+          extractedId: mostUpvotedStream.extractedId,
+          recentUpvotes: 0,
+          recentPlays: 1,
+          trendingScore: 1,
+          lastUpdated: new Date(),
+        },
+      });
+    }
+  } catch (err) {
+    console.error("Trending update failed on next", err);
+  }
+
   return NextResponse.json({
     stream: mostUpvotedStream,
   });
