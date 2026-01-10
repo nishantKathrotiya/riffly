@@ -22,6 +22,15 @@ import {
   DialogFooter,
 } from "@/src/components/ui/dialog";
 import { useRouter } from "next/navigation";
+import {
+  getQueue,
+  addStream as addStreamApi,
+  upvoteStream,
+  downvoteStream,
+  nextStream as nextStreamApi,
+  emptyQueue as emptyQueueApi,
+  removeStream as removeStreamApi,
+} from "@/src/app/intigrations/streams";
 
 interface Video {
   id: string;
@@ -64,17 +73,13 @@ export default function StreamView({
   const [loading, setLoading] = useState(false);
   const [playNextLoader, setPlayNextLoader] = useState(false);
   const videoPlayerRef = useRef<HTMLDivElement>(null);
-  const { data: session } = useSession() as { data: CustomSession | null };
   const [creatorUserId, setCreatorUserId] = useState<string | null>(null);
   const [isCreator, setIsCreator] = useState(false);
   const [isEmptyQueueDialogOpen, setIsEmptyQueueDialogOpen] = useState(false);
 
   async function refreshStreams() {
     try {
-      const res = await fetch(`/api/streams/?creatorId=${creatorId}`, {
-        credentials: "include",
-      });
-      const json = await res.json();
+      const json = await getQueue(creatorId);
       if (json.streams && Array.isArray(json.streams)) {
         setQueue(
           json.streams.length > 0
@@ -139,20 +144,7 @@ export default function StreamView({
     }
     setLoading(true);
     try {
-      const res = await fetch("/api/streams/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          creatorId,
-          url: inputLink,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || "An error occurred");
-      }
+      const data = await addStreamApi({ creatorId, url: inputLink });
       setQueue([...queue, data]);
       setInputLink("");
       toast.success("Song added to queue successfully");
@@ -182,22 +174,14 @@ export default function StreamView({
         .sort((a, b) => b.upvotes - a.upvotes)
     );
 
-    fetch(`/api/streams/${isUpvote ? "upvote" : "downvote"}`, {
-      method: "POST",
-      body: JSON.stringify({
-        streamId: id,
-      }),
-    });
+    (isUpvote ? upvoteStream(id) : downvoteStream(id)).catch(() => {});
   };
 
   const playNext = async () => {
     if (queue.length > 0) {
       try {
         setPlayNextLoader(true);
-        const data = await fetch("/api/streams/next", {
-          method: "GET",
-        });
-        const json = await data.json();
+        const json = await nextStreamApi();
         setCurrentVideo(json.stream);
         setQueue((q) => q.filter((x) => x.id !== json.stream?.id));
       } catch (e) {
@@ -223,40 +207,27 @@ export default function StreamView({
 
   const emptyQueue = async () => {
     try {
-      const res = await fetch("/api/streams/empty-queue", {
-        method: "POST",
-      });
-      const data = await res.json();
-      if (res.ok) {
-        toast.success(data.message);
-        refreshStreams();
-        setIsEmptyQueueDialogOpen(false);
-      } else {
-        toast.error(data.message || "Failed to empty queue");
-      }
-    } catch (error) {
+      const data = await emptyQueueApi(creatorId);
+      toast.success(data.message || "Queue emptied");
+      refreshStreams();
+      setIsEmptyQueueDialogOpen(false);
+    } catch (error: any) {
       console.error("Error emptying queue:", error);
-      toast.error("An error occurred while emptying the queue");
+      toast.error(
+        error?.message || "An error occurred while emptying the queue"
+      );
     }
   };
 
   const removeSong = async (streamId: string) => {
     try {
-      const res = await fetch("/api/streams/remove", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ streamId }),
-      });
-      if (res.ok) {
-        toast.success("Song removed successfully");
-        refreshStreams();
-      } else {
-        toast.error("Failed to remove song");
-      }
-    } catch (error) {
-      toast.error("An error occurred while removing the song");
+      await removeStreamApi(streamId);
+      toast.success("Song removed successfully");
+      refreshStreams();
+    } catch (error: any) {
+      toast.error(
+        error?.message || "An error occurred while removing the song"
+      );
     }
   };
 
