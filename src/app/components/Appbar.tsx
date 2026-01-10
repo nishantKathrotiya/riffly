@@ -3,7 +3,7 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { Button } from "@/src/components/ui/button";
 import { useUser } from "@/src/app/providers/UserProvider";
 import { RotateCw } from "lucide-react";
-
+import { AnimatedButton } from "./AnimatedButtonProps";
 export function Appbar() {
   const { user, loading } = useUser();
 
@@ -13,9 +13,15 @@ export function Appbar() {
         Riffly
       </div>
       <div>
-        <Button
-          className="bg-purple-600 text-white hover:bg-purple-700 flex items-center gap-2"
+        <AnimatedButton
+          variant="purple"
+          shine={false} // no shine effect
+          tiltOnClick={true} // no tilt
+          floatingIcon={false} // no floating icon
+          cursorFollow={true} // no cursor-follow lamp
+          darkBg={false} // optional: keep dark background off
           disabled={loading}
+          className="flex items-center gap-2 w-full justify-center"
           onClick={() => {
             if (user) {
               signOut();
@@ -29,7 +35,7 @@ export function Appbar() {
           ) : (
             <>{user ? "Logout" : "Signin"}</>
           )}
-        </Button>
+        </AnimatedButton>
       </div>
     </div>
   );

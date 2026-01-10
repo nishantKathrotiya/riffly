@@ -67,3 +67,189 @@
     @apply bg-background text-foreground;
   }
 }
+
+/***************************************************/
+
+/*************          NEW       ******************/
+
+/***************************************************/
+/* ============================= */
+/* CORE BUTTON */
+.animated-btn {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transform-style: preserve-3d;
+  cursor: pointer;
+
+  --x: 50%;
+  --y: 50%;
+  --accent: #7c3aed; /* default purple */
+  --shadow-color: rgba(124, 58, 237, 0.25);
+
+  padding: 0.65rem 1.25rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  color: white;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  background: var(--accent);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+
+/* ============================= */
+/* VARIANTS */
+.animated-btn--purple {
+  --accent: #7c3aed;
+  --shadow-color: rgba(124, 58, 237, 0.25);
+}
+
+.animated-btn--red {
+  --accent: #dc2626;
+  --shadow-color: rgba(220, 38, 38, 0.25);
+}
+
+.animated-btn--green {
+  --accent: #16a34a;
+  --shadow-color: rgba(22, 163, 74, 0.25);
+}
+
+/* ============================= */
+/* DARK BACKGROUND */
+.animated-btn--dark-bg {
+  background: var(--accent); /* default color initially */
+  box-shadow: 0 10px 30px var(--shadow-color),
+    inset 0 0 16px rgba(255, 255, 255, 0.08);
+  color: white;
+}
+
+/* Hover state: subtle gray overlay */
+.animated-btn--dark-bg:hover {
+  background: #2b2b2b; /* dark gray on hover */
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7),
+    inset 0 0 20px rgba(255, 255, 255, 0.08);
+}
+
+/* ============================= */
+/* ICON + FLOATING OPTION */
+.animated-btn__icon {
+  display: flex;
+}
+
+.animated-btn--floating-icon .animated-btn__icon {
+  animation: icon-float 1.8s ease-in-out infinite;
+}
+
+@keyframes icon-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+  50% {
+    transform: translateY(-2px) rotate(12deg);
+  }
+}
+
+/* ============================= */
+/* TILT + CLICK */
+.animated-btn--tilt:hover {
+  transform: perspective(700px) rotateX(calc((var(--y) - 50%) / 5))
+    rotateY(calc((50% - var(--x)) / 5)) scale(1.12);
+}
+
+/* Click effect: glow using variant color */
+.animated-btn--tilt:active {
+  transform: scale(0.96);
+  box-shadow: 0 0 18px var(--accent), inset 0 0 16px rgba(255, 255, 255, 0.25);
+  background: var(--accent);
+}
+
+/* ============================= */
+/* CURSOR FOLLOW (HOVER LAMP) */
+.animated-btn--cursor::before {
+  content: "";
+  position: absolute;
+  inset: -50%;
+  background: radial-gradient(
+    circle at var(--x) var(--y),
+    rgba(255, 255, 255, 0.35),
+    transparent 45%
+  );
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+.animated-btn--cursor:hover::before {
+  opacity: 1;
+}
+
+/* ============================= */
+/* SHINE SWEEP */
+@keyframes shine-sweep {
+  0% {
+    transform: translateX(-120%) rotate(35deg);
+    opacity: 0;
+  }
+  20%,
+  80% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateX(320%) rotate(35deg);
+    opacity: 0;
+  }
+}
+
+.animated-btn--shine::after {
+  content: "";
+  position: absolute;
+  inset: -120%;
+  width: 45%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.85),
+    transparent
+  );
+  filter: blur(8px);
+  pointer-events: none;
+
+  animation: shine-sweep 2.8s ease-in-out infinite;
+  opacity: 1;
+}
+
+/* Hide shine on hover */
+.animated-btn--shine:hover::after {
+  opacity: 0;
+  animation-play-state: paused;
+  transition: opacity 0.25s ease;
+}
+
+/* ============================= */
+/* DISABLED STATE */
+.animated-btn--disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.animated-btn--disabled::before,
+.animated-btn--disabled::after {
+  display: none;
+}
+
+/* ============================= */
+/* ACCESSIBILITY */
+@media (prefers-reduced-motion: reduce) {
+  .animated-btn,
+  .animated-btn::before,
+  .animated-btn::after {
+    animation: none;
+    transition: none;
+  }
+}

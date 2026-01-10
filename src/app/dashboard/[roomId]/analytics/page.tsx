@@ -6,7 +6,8 @@ import WeeklyAddsChart from "@/src/app/components/WeeklyAddsChart";
 import ListCard from "@/src/app/components/ListCard";
 import { Button } from "@/src/components/ui/button";
 import { ToastContainer } from "react-toastify";
-import { ListStart, RotateCw } from "lucide-react";
+import { ListStart, RotateCw, ArrowLeft } from "lucide-react";
+import { AnimatedButton } from "@/src/app/components/AnimatedButtonProps";
 
 export default function RoomAnalyticsPage({
   params,
@@ -42,7 +43,15 @@ export default function RoomAnalyticsPage({
     <div className="flex flex-col min-h-screen bg-[rgb(10,10,10)] text-gray-200">
       <Appbar />
       <div className="w-full max-w-screen-xl mx-auto px-4 py-6 space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-4">
+          <Button
+            variant="ghost"
+            onClick={() => window.history.back()}
+            className="flex items-center gap-2 text-gray-200 hover:bg-transparent hover:text-white"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </Button>
           <h1 className="text-2xl font-bold text-white">Analytics Dashboard</h1>
           <span className="px-2 py-1 rounded bg-gray-900 border border-gray-800 text-white text-sm">
             {roomId}
@@ -110,30 +119,43 @@ export default function RoomAnalyticsPage({
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button
-                onClick={() => loadRecommendation()}
+              <AnimatedButton
+                variant="purple"
+                shine={false}
+                tiltOnClick={true}
+                floatingIcon={false}
+                cursorFollow={true}
+                darkBg={false}
                 disabled={recLoading}
-                className="p-2 aspect-square bg-purple-700 hover:bg-purple-800 text-white"
+                className="p-2 aspect-square"
+                onClick={() => loadRecommendation()}
               >
                 <RotateCw
                   className={`w-4 h-4 ${
                     recLoading ? "animate-spin [animation-duration:1.8s]" : ""
                   }`}
                 />
-              </Button>
-              <Button
+              </AnimatedButton>
+
+              <AnimatedButton
+                variant="green"
+                shine={false}
+                tiltOnClick={true}
+                floatingIcon={false}
+                cursorFollow={true}
+                darkBg={true}
+                disabled={addLoading || !rec}
+                className="p-2 aspect-square"
                 onClick={() =>
                   rec?.extractedId && addRecommendationToQueue(rec.extractedId)
                 }
-                disabled={addLoading || !rec}
-                className="p-2 aspect-square bg-green-600 hover:bg-green-700 text-white"
               >
                 {addLoading ? (
                   <RotateCw className="w-4 h-4 animate-spin [animation-duration:1.8s]" />
                 ) : (
                   <ListStart className="w-4 h-4" />
                 )}
-              </Button>
+              </AnimatedButton>
             </div>
           </div>
         </div>

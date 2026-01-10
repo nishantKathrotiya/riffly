@@ -3,7 +3,16 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Card, CardContent } from "@/src/components/ui/card";
-import { ChevronUp, ChevronDown, Share2, Play, Sparkles } from "lucide-react";
+import {
+  ChevronUp,
+  ChevronDown,
+  Share2,
+  Play,
+  Sparkles,
+  Trash2,
+  ListStart,
+  RotateCw,
+} from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Appbar } from "./Appbar";
@@ -11,7 +20,6 @@ import LiteYouTubeEmbed from "react-lite-youtube-embed";
 import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
 import { YT_REGEX } from "../lib/utils";
 import YouTubePlayer from "youtube-player";
-import { useSession } from "next-auth/react";
 import type { Session } from "next-auth";
 import {
   Dialog,
@@ -31,6 +39,7 @@ import {
   emptyQueue as emptyQueueApi,
   removeStream as removeStreamApi,
 } from "@/src/app/intigrations/streams";
+import { AnimatedButton } from "./AnimatedButtonProps";
 
 interface Video {
   id: string;
@@ -246,31 +255,45 @@ export default function StreamView({
                 <h2 className="text-2xl font-bold text-white">
                   Upcoming Songs
                 </h2>
-                <div className="space-x-2">
+                <div className="space-x-2 flex items-center">
                   {/* Analytics Redirect BTN  */}
-                  <Button
+                  <AnimatedButton
+                    variant="purple"
+                    icon={<Sparkles className="w-4 h-4 fill-white" />}
+                    shine
+                    tiltOnClick
+                    cursorFollow
+                    darkBg
+                    floatingIcon
                     onClick={handleRedirectToAnalytics}
-                    className="bg-purple-700 hover:bg-purple-800 text-white"
                   >
-                    <Sparkles className="mr-2 w-4 h-4 " />
-                    <span>Insights</span>
-                  </Button>
+                    Insights
+                  </AnimatedButton>
+
                   {/* Share BTN  */}
-                  <Button
+                  <AnimatedButton
+                    variant="purple"
+                    icon={<Share2 className="w-4 h-4" />}
+                    shine={false}
+                    tiltOnClick
+                    cursorFollow={true}
                     onClick={handleShare}
-                    className="bg-purple-700 hover:bg-purple-800 text-white"
                   >
-                    <Share2 className="mr-2 h-4 w-4" />
                     Share
-                  </Button>
+                  </AnimatedButton>
+
                   {/* Empty Queue BTN */}
                   {isCreator && (
-                    <Button
+                    <AnimatedButton
+                      variant="red"
+                      icon={<Trash2 className="w-4 h-4" />}
+                      shine={false}
+                      tiltOnClick
+                      cursorFollow={true}
                       onClick={() => setIsEmptyQueueDialogOpen(true)}
-                      className="bg-red-600 hover:bg-red-700 text-white"
                     >
                       Empty Queue
-                    </Button>
+                    </AnimatedButton>
                   )}
                 </div>
               </div>
@@ -321,9 +344,9 @@ export default function StreamView({
                               variant="outline"
                               size="sm"
                               onClick={() => removeSong(video.id)}
-                              className="bg-red-600 hover:bg-red-700 text-white"
+                              className="bg-red-600 hover:bg-red-700 text-white p-0 aspect-square"
                             >
-                              Remove
+                              <Trash2 className="w-4 h-4 p-0 m-0 hover:outline-white hover:outline-2 border-white" />
                             </Button>
                           </>
                         )}
@@ -350,13 +373,28 @@ export default function StreamView({
                   onChange={(e) => setInputLink(e.target.value)}
                   className="bg-gray-900 text-white border-gray-700 placeholder-gray-500"
                 />
-                <Button
-                  disabled={loading}
+
+                {/* // Add TO Queue Button */}
+                <AnimatedButton
+                  variant="green"
+                  icon={
+                    loading ? (
+                      <RotateCw className="w-4 h-4 animate-spin [animation-duration:1.8s]" />
+                    ) : (
+                      <ListStart className="w-4 h-4" />
+                    )
+                  }
+                  shine={false}
+                  tiltOnClick={true}
+                  darkBg={true}
+                  floatingIcon={false}
+                  cursorFollow={true}
                   type="submit"
-                  className="w-full bg-purple-700 hover:bg-purple-800 text-white"
+                  disabled={loading}
+                  className="w-full flex items-center justify-center"
                 >
-                  {loading ? "Loading..." : "Add to Queue"}
-                </Button>
+                  Add to Queue
+                </AnimatedButton>
               </form>
               {inputLink && inputLink.match(YT_REGEX) && !loading && (
                 <Card className="bg-gray-900 border-gray-800">
@@ -397,14 +435,19 @@ export default function StreamView({
                   </CardContent>
                 </Card>
                 {playVideo && (
-                  <Button
+                  //  PLay next
+                  <AnimatedButton
+                    variant="purple"
+                    icon={<Play className="w-4 h-4" />}
+                    tiltOnClick
+                    cursorFollow
+                    darkBg={true}
                     disabled={playNextLoader}
                     onClick={playNext}
-                    className="w-full bg-purple-700 hover:bg-purple-800 text-white"
+                    className="w-full flex items-center justify-center"
                   >
-                    <Play className="mr-2 h-4 w-4" />{" "}
-                    {playNextLoader ? "Loading..." : "Play next"}
-                  </Button>
+                    {playNextLoader ? "Loading..." : "Play Next"}
+                  </AnimatedButton>
                 )}
               </div>
             </div>
