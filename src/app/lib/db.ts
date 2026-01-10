@@ -1,4 +1,15 @@
 import { PrismaClient } from "@prisma/client";
 
-export const prismaClient = new PrismaClient();
-//  this isnt the best, we should introduce a singleton herea
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
+};
+
+export const prismaClient =
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    log: ["error"],
+  });
+
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prismaClient;
+}
