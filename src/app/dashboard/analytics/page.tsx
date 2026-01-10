@@ -12,9 +12,11 @@ import WeeklyAddsChart from "@/src/app/dashboard/analytics/components/WeeklyAdds
 import ListCard from "@/src/app/dashboard/analytics/components/ListCard";
 import { ListStart, RotateCw } from "lucide-react";
 
+import { useUser } from "@/src/app/providers/UserProvider";
+
 export default function AnalyticsPage() {
-  const [roomId, setRoomId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, loading: userLoading } = useUser();
+  const roomId = user?.id ?? null;
 
   const {
     // data
@@ -46,24 +48,6 @@ export default function AnalyticsPage() {
     loadYourTop,
   } = useAnalytics(roomId);
 
-  useEffect(() => {
-    let cancelled = false;
-    async function fetchUser() {
-      try {
-        const res = await fetch("/api/user");
-        const json = await res.json();
-        if (!cancelled) setRoomId(json.user?.id || null);
-      } catch {
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-    fetchUser();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
   return (
     <div className="flex flex-col min-h-screen bg-[rgb(10,10,10)] text-gray-200">
       <Appbar />
@@ -73,7 +57,7 @@ export default function AnalyticsPage() {
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-400">Room</span>
             <span className="px-2 py-1 rounded bg-gray-900 border border-gray-800 text-white text-sm min-w-40 text-center">
-              {loading ? "Loading..." : roomId ?? "Unknown"}
+              {userLoading ? "Loading..." : roomId ?? "Unknown"}
             </span>
           </div>
         </div>

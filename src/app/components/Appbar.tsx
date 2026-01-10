@@ -1,11 +1,11 @@
 "use client";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { Button } from "@/src/components/ui/button";
-//@ts-ignore
-import { Music } from "lucide-react";
+import { useUser } from "@/src/app/providers/UserProvider";
+import { RotateCw } from "lucide-react";
 
 export function Appbar() {
-  const session = useSession();
+  const { user, loading } = useUser();
 
   return (
     <div className="flex justify-between px-20 pt-4">
@@ -13,22 +13,23 @@ export function Appbar() {
         Riffly
       </div>
       <div>
-        {session.data?.user && (
-          <Button
-            className="bg-purple-600 text-white hover:bg-purple-700"
-            onClick={() => signOut()}
-          >
-            Logout
-          </Button>
-        )}
-        {!session.data?.user && (
-          <Button
-            className="bg-purple-600 text-white hover:bg-purple-700"
-            onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-          >
-            Signin
-          </Button>
-        )}
+        <Button
+          className="bg-purple-600 text-white hover:bg-purple-700 flex items-center gap-2"
+          disabled={loading}
+          onClick={() => {
+            if (user) {
+              signOut();
+            } else {
+              signIn("google", { callbackUrl: "/dashboard" });
+            }
+          }}
+        >
+          {loading ? (
+            <RotateCw className="w-4 h-4 animate-spin [animation-duration:1.8s] ease-in-out" />
+          ) : (
+            <>{user ? "Logout" : "Signin"}</>
+          )}
+        </Button>
       </div>
     </div>
   );
