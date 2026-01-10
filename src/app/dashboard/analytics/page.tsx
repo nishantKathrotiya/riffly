@@ -6,6 +6,18 @@ import { Button } from "@/src/components/ui/button";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+import {
+  getStats,
+  getWeeklyAdds,
+  getTrending,
+  getLikesGivenTop,
+  getYouAddMost,
+  getYourTopLiked,
+  getRecommendation,
+  addToQueue,
+  type ListItem,
+} from "@/src/app/dashboard/analytics/integration";
+
 function Tile({
   title,
   value,
@@ -197,34 +209,34 @@ export default function AnalyticsPage() {
   useEffect(() => {
     if (!roomId) return;
     let cancelled = false;
+
     async function loadStats() {
       try {
         setStatsLoading(true);
-        const res = await fetch(`/api/analytics/stats?roomId=${roomId}`);
-        const json = await res.json();
-        if (!cancelled && res.ok) {
+        const data = await getStats(roomId!);
+        if (!cancelled) {
           setStats({
-            totalAdded: json.totalAdded ?? 0,
-            totalLikesGot: json.totalLikesGot ?? 0,
-            totalLikesGiven: json.totalLikesGiven ?? 0,
-            avgLikes: json.avgLikes ?? 0,
+            totalAdded: data.totalAdded ?? 0,
+            totalLikesGot: data.totalLikesGot ?? 0,
+            totalLikesGiven: data.totalLikesGiven ?? 0,
+            avgLikes: data.avgLikes ?? 0,
           });
         }
       } finally {
         if (!cancelled) setStatsLoading(false);
       }
     }
+
     async function loadWeekly() {
       try {
         setChartLoading(true);
-        const res = await fetch(`/api/analytics/weekly-adds?roomId=${roomId}`);
-        const json = await res.json();
-        if (!cancelled && res.ok) {
-          const counts =
-            Array.isArray(json.counts) && json.counts.length === 7
-              ? json.counts
-              : Array(7).fill(0);
-          setWeekly(counts);
+        const data = await getWeeklyAdds(roomId!);
+        if (!cancelled) {
+          setWeekly(
+            Array.isArray(data.counts) && data.counts.length === 7
+              ? data.counts
+              : Array(7).fill(0)
+          );
         }
       } finally {
         if (!cancelled) setChartLoading(false);
@@ -234,24 +246,8 @@ export default function AnalyticsPage() {
     async function loadTrending() {
       try {
         setTrendLoading(true);
-        const res = await fetch(
-          `/api/analytics/trending?roomId=${roomId}&limit=10`
-        );
-        const json = await res.json();
-        if (!cancelled && res.ok) {
-          const items = Array.isArray(json.items)
-            ? json.items.map((r: any) => ({
-                id: r.streamId ?? r.id,
-                title: r.stream?.title ?? r.extractedId ?? "Unknown",
-                img: r.stream?.smallImg ?? null,
-                right:
-                  typeof r.trendingScore === "number"
-                    ? r.trendingScore.toFixed(1)
-                    : "0",
-              }))
-            : [];
-          setTrendItems(items);
-        }
+        const items = await getTrending(roomId!, 10);
+        if (!cancelled) setTrendItems(items);
       } finally {
         if (!cancelled) setTrendLoading(false);
       }
@@ -260,21 +256,8 @@ export default function AnalyticsPage() {
     async function loadLikesGivenTop() {
       try {
         setLikeMostLoading(true);
-        const res = await fetch(
-          `/api/analytics/likes-given-top?roomId=${roomId}&limit=10`
-        );
-        const json = await res.json();
-        if (!cancelled && res.ok) {
-          const items = Array.isArray(json.items)
-            ? json.items.map((r: any) => ({
-                id: r.extractedId,
-                title: r.title ?? r.extractedId,
-                img: r.smallImg ?? null,
-                right: r.count ?? 0,
-              }))
-            : [];
-          setLikeMostItems(items);
-        }
+        const items = await getLikesGivenTop(roomId!, 10);
+        if (!cancelled) setLikeMostItems(items);
       } finally {
         if (!cancelled) setLikeMostLoading(false);
       }
@@ -283,21 +266,8 @@ export default function AnalyticsPage() {
     async function loadYouAddMost() {
       try {
         setYouAddLoading(true);
-        const res = await fetch(
-          `/api/analytics/you-add-most?roomId=${roomId}&limit=10`
-        );
-        const json = await res.json();
-        if (!cancelled && res.ok) {
-          const items = Array.isArray(json.items)
-            ? json.items.map((r: any) => ({
-                id: r.extractedId,
-                title: r.title ?? r.extractedId,
-                img: r.smallImg ?? null,
-                right: r.count ?? 0,
-              }))
-            : [];
-          setYouAddItems(items);
-        }
+        const items = await getYouAddMost(roomId!, 10);
+        if (!cancelled) setYouAddItems(items);
       } finally {
         if (!cancelled) setYouAddLoading(false);
       }
@@ -306,21 +276,8 @@ export default function AnalyticsPage() {
     async function loadYourTopLiked() {
       try {
         setYourTopLikedLoading(true);
-        const res = await fetch(
-          `/api/analytics/your-top-liked?roomId=${roomId}&limit=10`
-        );
-        const json = await res.json();
-        if (!cancelled && res.ok) {
-          const items = Array.isArray(json.items)
-            ? json.items.map((r: any) => ({
-                id: r.extractedId,
-                title: r.title ?? r.extractedId,
-                img: r.smallImg ?? null,
-                right: r.count ?? 0,
-              }))
-            : [];
-          setYourTopLikedItems(items);
-        }
+        const items = await getYourTopLiked(roomId!, 10);
+        if (!cancelled) setYourTopLikedItems(items);
       } finally {
         if (!cancelled) setYourTopLikedLoading(false);
       }
@@ -330,35 +287,20 @@ export default function AnalyticsPage() {
       if (!roomId) return;
       try {
         setRecLoading(true);
-        const res = await fetch(
-          `/api/analytics/recommendation?roomId=${roomId}`
-        );
-        const json = await res.json();
-        if (res.ok && json?.recommendation) {
-          const r = json.recommendation;
-          setRec({
-            extractedId: r.extractedId,
-            title: r.sample?.title ?? r.extractedId,
-            img: r.sample?.smallImg ?? r.sample?.bigImg ?? null,
-            score: typeof r.score === "number" ? r.score : 0,
-            parts: r.parts ?? undefined,
-          });
-        } else {
-          setRec(null);
-        }
+        const r = await getRecommendation(roomId);
+        setRec(r);
       } finally {
         setRecLoading(false);
       }
     }
 
-    loadRecommendation();
-
+    loadStats();
+    loadWeekly();
     loadTrending();
     loadLikesGivenTop();
     loadYouAddMost();
     loadYourTopLiked();
-    loadStats();
-    loadWeekly();
+    loadRecommendation();
     return () => {
       cancelled = true;
     };
@@ -373,23 +315,11 @@ export default function AnalyticsPage() {
     if (!roomId || !rec?.extractedId) return;
     try {
       setAddLoading(true);
-      const url = `https://www.youtube.com/watch?v=${rec.extractedId}`;
-      const res = await fetch("/api/streams/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ creatorId: roomId, url }),
-      });
-      const json = await res.json();
-      if (res.ok) {
-        toast.success("Added to queue");
-        // Optionally refresh lists after add
-        // (lightweight: just refresh recommendation)
-        // await loadRecommendation();
-      } else {
-        toast.error(json?.message || "Failed to add");
-      }
-    } catch (e) {
-      toast.error("Something went wrong");
+      await addToQueue(roomId, rec.extractedId);
+      toast.success("Added to queue");
+      //   await loadRecommendation();
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to add");
     } finally {
       setAddLoading(false);
     }
