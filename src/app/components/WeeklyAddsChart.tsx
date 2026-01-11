@@ -2,6 +2,7 @@
 import { useMemo } from "react";
 import { Card, CardContent } from "@/src/components/ui/card";
 import WeekPickerPrebuilt from "@/src/app/components/WeekPicker";
+import { AnimatedLineChart } from "./AnimatedLineChart";
 
 export default function WeeklyAddsChart({
   counts,
@@ -29,21 +30,26 @@ export default function WeeklyAddsChart({
     [counts]
   );
   const labels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const rangeLabel = useMemo(() => {
-    if (!weekStart || !weekEnd) return null;
-    const s = new Date(weekStart);
-    const e = new Date(weekEnd);
-    const fmt = (d: Date) =>
-      d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-    return `${fmt(s)} – ${fmt(e)}`;
-  }, [weekStart, weekEnd]);
+
+  const chartData = useMemo(() => {
+    return (
+      counts?.map((value, index) => ({
+        name: labels[index % labels.length],
+        value: value || 0,
+      })) || []
+    );
+  }, [counts, labels]);
 
   return (
-    <Card className="bg-gray-900 border-gray-800">
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-white font-semibold">Weekly Adds</h3>
-          {/* Inline week picker */}
+    <div className="relative p-6 bg-gradient-to-br from-gray-800 to-gray-900 border-[1px] border-gray-600 rounded-xl shadow-xl overflow-hidden">
+      <div className="absolute inset-0 bg-grid-white/[0.05] [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]" />
+
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold text-white relative z-10">
+          Weekly Data
+        </h3>
+
+        <div className="flex items-center gap-2 z-10">
           {onPrev && onNext && onPickDate && (
             <WeekPickerPrebuilt
               weekStart={weekStart ? new Date(weekStart) : new Date()}
@@ -51,40 +57,18 @@ export default function WeeklyAddsChart({
               onPrev={onPrev}
               onNext={onNext}
               onPickDate={onPickDate}
-              onReset={onReset || (() => {})}
+              onReset={onReset ?? (() => {})}
             />
           )}
         </div>
-        <div className="grid grid-cols-7 gap-3 items-end h-64 lg:h-72">
-          {labels.map((label, i) => {
-            const v = counts?.[i] ?? 0;
-            const h = max > 0 ? Math.max(6, Math.round((v / max) * 200)) : 6;
-            return (
-              <div key={i} className="flex flex-col items-center gap-2">
-                <div className="relative group">
-                  <div
-                    className={`w-8 rounded ${
-                      loading
-                        ? "bg-purple-700/30 animate-pulse"
-                        : "bg-purple-700"
-                    }`}
-                    style={{ height: `${h}px` }}
-                    aria-label={`${label}: ${v}`}
-                  />
-                  {!loading && (
-                    <div className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-150">
-                      <div className="px-2 py-1 text-xs rounded bg-black/85 text-white border border-white/10 shadow whitespace-nowrap">
-                        {v} {v === 1 ? "song" : "songs"}
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <div className="text-xs text-gray-400">{label}</div>
-              </div>
-            );
-          })}
+      </div>
+      {loading ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
         </div>
-      </CardContent>
-    </Card>
+      ) : (
+        <AnimatedLineChart title="Weekly Adds" data={chartData} />
+      )}
+    </div>
   );
 }

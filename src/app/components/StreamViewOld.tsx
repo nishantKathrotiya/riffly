@@ -285,7 +285,7 @@ export default function StreamView({
                 </div>
               </div>
               {queue.length === 0 && (
-                <Card className="bg-gray-900 border-gray-800 w-full">
+                <Card className="bg-gradient-to-br from-gray-800 to-gray-900 w-full">
                   <CardContent className="p-4">
                     <p className="text-center py-8 text-gray-400">
                       No videos in queue
@@ -294,7 +294,10 @@ export default function StreamView({
                 </Card>
               )}
               {queue.map((video) => (
-                <Card key={video.id} className="bg-gray-900 border-gray-800">
+                <Card
+                  key={video.id}
+                  className="bg-gradient-to-br from-gray-800 to-gray-900"
+                >
                   <CardContent className="p-4 flex items-center space-x-4">
                     <img
                       src={video.smallImg}
@@ -360,7 +363,7 @@ export default function StreamView({
                 </Button>
               </form>
               {inputLink && inputLink.match(YT_REGEX) && !loading && (
-                <Card className="bg-gray-900 border-gray-800">
+                <Card className="bg-gradient-to-br from-gray-800 to-gray-900">
                   <CardContent className="p-4">
                     <LiteYouTubeEmbed title="" id={inputLink.split("?v=")[1]} />
                   </CardContent>
@@ -368,7 +371,7 @@ export default function StreamView({
               )}
               <div className="space-y-4">
                 <h2 className="text-2xl font-bold text-white">Now Playing</h2>
-                <Card className="bg-gray-900 border-gray-800">
+                <Card className="bg-gradient-to-br from-gray-800 to-gray-900">
                   <CardContent className="p-4">
                     {currentVideo ? (
                       <div>

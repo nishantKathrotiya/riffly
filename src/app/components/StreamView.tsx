@@ -316,7 +316,7 @@ export default function StreamView({
               </div>
             </form>
             {inputLink && inputLink.match(YT_REGEX) && !loading && (
-              <Card className="bg-gray-900 border-gray-800">
+              <Card className="bg-gradient-to-br from-gray-800 to-gray-900 border-[1px] border-gray-600">
                 <CardContent className="p-4">
                   <LiteYouTubeEmbed title="" id={inputLink.split("?v=")[1]} />
                 </CardContent>
@@ -340,19 +340,19 @@ export default function StreamView({
                   />
                 )}
               </div>
-              <Card className="bg-gray-900 border-gray-800">
-                <CardContent className="p-4 flex flex-row sm:flex-col items-center sm:items-start space-x-3 sm:space-x-0">
+              <Card className="bg-gradient-to-br from-gray-800 to-gray-900 border-[1px] border-gray-600">
+                <CardContent className="p-4  flex flex-row sm:flex-col items-center sm:items-start space-x-3 sm:space-x-0">
                   {currentVideo ? (
                     <>
                       {playVideo ? (
                         <div
                           ref={videoPlayerRef}
-                          className="rounded bg-black w-28 h-16 sm:w-full sm:h-72 flex-shrink-0"
+                          className="rounded bg-gradient-to-br from-gray-800 to-gray-900 border-[1px] border-gray-600 w-28 h-16 sm:w-full sm:h-72 flex-shrink-0"
                         />
                       ) : (
                         <img
                           src={currentVideo.bigImg}
-                          className="rounded bg-black w-28 h-16 sm:w-full sm:h-72 flex-shrink-0"
+                          className="rounded bg-gradient-to-br from-gray-800 to-gray-900 border-[1px] border-gray-600 w-28 h-16 sm:w-full sm:h-72 flex-shrink-0"
                           alt={currentVideo.title}
                         />
                       )}
@@ -397,7 +397,7 @@ export default function StreamView({
             </div>
 
             {queue.length === 0 && (
-              <Card className="bg-gray-900 border-gray-800 w-full">
+              <Card className="bg-gradient-to-br from-gray-800 to-gray-900 border-[1px] border-gray-600 w-full">
                 <CardContent className="p-4">
                   <p className="text-center py-8 text-gray-400">
                     No videos in queue
@@ -406,7 +406,10 @@ export default function StreamView({
               </Card>
             )}
             {queue.map((video) => (
-              <Card key={video.id} className="bg-gray-900 border-gray-800 mb-2">
+              <Card
+                key={video.id}
+                className="bg-gradient-to-br from-gray-800 to-gray-900 border-[1px] border-gray-600 mb-2 "
+              >
                 <CardContent className="p-4 flex items-center space-x-4">
                   <img
                     src={video.smallImg}

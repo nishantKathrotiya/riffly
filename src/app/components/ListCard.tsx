@@ -22,7 +22,7 @@ export default function ListCard({
   onRefresh?: () => void;
 }) {
   return (
-    <Card className="bg-gray-900 border-gray-800">
+    <Card className="bg-gradient-to-br from-gray-800 to-gray-900 border-[1px] border-gray-600">
       <CardContent className="p-4 space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-white font-semibold">{title}</h3>

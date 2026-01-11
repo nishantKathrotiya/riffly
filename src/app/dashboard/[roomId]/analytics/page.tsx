@@ -8,7 +8,6 @@ import { Button } from "@/src/components/ui/button";
 import { ToastContainer } from "react-toastify";
 import { ListStart, RotateCw, ArrowLeft } from "lucide-react";
 import { AnimatedButton } from "@/src/app/components/AnimatedButtonProps";
-import WeekPickerPrebuilt from "@/src/app/components/WeekPicker";
 
 export default function RoomAnalyticsPage({
   params,
@@ -68,7 +67,7 @@ export default function RoomAnalyticsPage({
             </div>
 
             {/* Right: roomId badge */}
-            <span className="hidden md:inline px-2 py-1 rounded bg-gray-900 border border-gray-800 text-white text-sm">
+            <span className="hidden md:inline px-2 py-1 bg-gradient-to-br from-gray-800 to-gray-900 border-[1px] border-gray-600  rounded-lg text-white text-sm">
               {roomId}
             </span>
           </div>
@@ -88,10 +87,12 @@ export default function RoomAnalyticsPage({
           avgLikes={stats?.avgLikes ?? 0}
         />
 
-        <div className="grid grid-cols-1 gap-4">
-          <div className="bg-gray-900 border border-gray-800 rounded p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <p className="text-white font-semibold">Best Songs to Add Now</p>
+        <div className="grid grid-cols-1 gap-4 bg-gradient-to-br from-gray-800 to-gray-900 border-[1px] border-gray-600 rounded-xl">
+          <div className=" p-4 space-y-3 rounded-lg">
+            <div className="flex items-center justify-between ">
+              <p className="text-white text-xl font-semibold">
+                Best Songs to Add Now
+              </p>
               <AnimatedButton
                 variant="purple"
                 shine={false}
@@ -99,7 +100,7 @@ export default function RoomAnalyticsPage({
                 cursorFollow
                 darkBg={false}
                 disabled={recLoading}
-                className="mr-1 p-0!"
+                className="mr-4 p-0!"
                 onClick={() => loadRecommendation()}
               >
                 <RotateCw
@@ -107,6 +108,7 @@ export default function RoomAnalyticsPage({
                     recLoading ? "animate-spin [animation-duration:1.8s]" : ""
                   }`}
                 />
+                Refresh
               </AnimatedButton>
             </div>
 
@@ -121,7 +123,7 @@ export default function RoomAnalyticsPage({
                 No recommendation right now
               </p>
             ) : (
-              <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+              <div className="space-y-2 max-h-64 overflow-y-auto pr-1 scroll-area">
                 {rec.map((r) => (
                   <div
                     key={r.extractedId}

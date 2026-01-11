@@ -61,7 +61,13 @@ export function useAnalytics(roomId: string | null) {
     x.setDate(x.getDate() + n);
     return x;
   }
-  const setWeek = useCallback((d: Date) => setWeekStart(d), []);
+  // const setWeek = useCallback((d: Date) => setWeekStart(d), []);
+
+  // In useAnalytics.ts, update the setWeek function:
+  const setWeek = useCallback((d: Date) => {
+    console.log("Setting week to:", d);
+    setWeekStart(d);
+  }, []);
 
   // state: selected week
   const [weekStart, setWeekStart] = useState<Date>(() => sundayOf(new Date()));
