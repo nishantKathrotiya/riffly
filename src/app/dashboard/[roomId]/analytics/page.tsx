@@ -123,22 +123,25 @@ export default function RoomAnalyticsPage({
             ) : (
               <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
                 {rec.map((r) => (
-                  <div key={r.extractedId} className="flex items-center gap-3">
-                    {/* 20% image */}
-                    <div className="basis-[20%] shrink-0">
+                  <div
+                    key={r.extractedId}
+                    className="flex items-center gap-3 h-16"
+                  >
+                    {/* Image with fixed size */}
+                    <div className="w-12 h-12 flex-shrink-0">
                       {r.img ? (
                         <img
                           src={r.img}
                           alt=""
-                          className="w-full aspect-square object-cover rounded"
+                          className="w-full h-full object-cover rounded"
                         />
                       ) : (
-                        <div className="w-full aspect-square bg-gray-800 rounded" />
+                        <div className="w-full h-full bg-gray-800 rounded" />
                       )}
                     </div>
 
-                    {/* 60% details */}
-                    <div className="basis-[60%] min-w-0">
+                    {/* Details with flex-1 to take remaining space */}
+                    <div className="flex-1 min-w-0">
                       <p className="text-white text-sm truncate">{r.title}</p>
                       <p className="text-xs text-gray-400">
                         Score: {r.score.toFixed(1)}

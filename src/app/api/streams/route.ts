@@ -73,35 +73,37 @@ export async function POST(req: NextRequest) {
     // const res = await youtubesearchapi.GetVideoDetails(extractedId);
     const res = await getVideoInfo(extractedId);
 
+    //Check Time slots
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+    const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
+
+    //Find Recent Stream in less than 10 minutes
+    const recentStreams = await prismaClient.stream.findMany({
+      where: {
+        userId: data.creatorId,
+        createAt: {
+          gte: tenMinutesAgo,
+        },
+      },
+    });
+
+    // Check for duplicate song in the last 10 minutes
+    const duplicateSong = recentStreams.find(
+      (stream) => stream.extractedId === extractedId
+    );
+    if (duplicateSong) {
+      return NextResponse.json(
+        {
+          message: "This song was already added in the last 10 minutes",
+        },
+        {
+          status: 429,
+        }
+      );
+    }
+
     // Check if the user is not the creator
     if (user.id !== data.creatorId) {
-      const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
-      const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
-
-      const recentStreams = await prismaClient.stream.findMany({
-        where: {
-          userId: data.creatorId,
-          createAt: {
-            gte: tenMinutesAgo,
-          },
-        },
-      });
-
-      // Check for duplicate song in the last 10 minutes
-      const duplicateSong = recentStreams.find(
-        (stream) => stream.extractedId === extractedId
-      );
-      if (duplicateSong) {
-        return NextResponse.json(
-          {
-            message: "This song was already added in the last 10 minutes",
-          },
-          {
-            status: 429,
-          }
-        );
-      }
-
       // Rate limiting checks for non-creator users
       const userStreams = recentStreams.filter(
         (stream) => stream.userId === user.id
