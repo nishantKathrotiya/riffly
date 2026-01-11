@@ -51,19 +51,33 @@ export default function RoomAnalyticsPage({
     <div className="flex flex-col min-h-screen bg-[rgb(10,10,10)] text-gray-200">
       <Appbar />
       <div className="w-full max-w-screen-xl mx-auto px-4 py-6 space-y-6">
-        <div className="flex items-center justify-between mb-4">
-          <Button
-            variant="ghost"
-            onClick={() => window.history.back()}
-            className="flex items-center gap-2 text-gray-200 hover:bg-transparent hover:text-white"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back
-          </Button>
-          <h1 className="text-2xl font-bold text-white">Analytics Dashboard</h1>
-          <span className="px-2 py-1 rounded bg-gray-900 border border-gray-800 text-white text-sm">
-            {roomId}
-          </span>
+        <div className="mb-4">
+          <div className="flex items-center justify-between">
+            {/* Left: Back arrow + title */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                onClick={() => window.history.back()}
+                className="p-1 text-gray-200 hover:bg-transparent hover:text-white"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+              <h1 className="text-xl sm:text-2xl font-bold text-white">
+                Analytics Dashboard
+              </h1>
+            </div>
+
+            {/* Right: roomId badge */}
+            <span className="hidden md:inline px-2 py-1 rounded bg-gray-900 border border-gray-800 text-white text-sm">
+              {roomId}
+            </span>
+          </div>
+
+          <div className="mt-2 md:hidden">
+            <span className="px-2 py-1 rounded bg-gray-900 border border-gray-800 text-white text-xs">
+              {roomId}
+            </span>
+          </div>
         </div>
 
         <StatsTiles
@@ -74,17 +88,88 @@ export default function RoomAnalyticsPage({
           avgLikes={stats?.avgLikes ?? 0}
         />
 
-        {/* <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="lg:col-span-2">
-            <WeeklyAddsChart counts={weekly} loading={weeklyLoading} />
+        <div className="grid grid-cols-1 gap-4">
+          <div className="bg-gray-900 border border-gray-800 rounded p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-white font-semibold">Best Songs to Add Now</p>
+              <AnimatedButton
+                variant="purple"
+                shine={false}
+                tiltOnClick
+                cursorFollow
+                darkBg={false}
+                disabled={recLoading}
+                className="mr-1 p-0!"
+                onClick={() => loadRecommendation()}
+              >
+                <RotateCw
+                  className={`w-4 h-4 m-0! px-0! py-0! ${
+                    recLoading ? "animate-spin [animation-duration:1.8s]" : ""
+                  }`}
+                />
+              </AnimatedButton>
+            </div>
+
+            {recLoading ? (
+              <div className="grid gap-2">
+                <div className="h-12 rounded bg-gray-800 animate-pulse" />
+                <div className="h-12 rounded bg-gray-800 animate-pulse" />
+                <div className="h-12 rounded bg-gray-800 animate-pulse" />
+              </div>
+            ) : rec.length === 0 ? (
+              <p className="text-gray-500 text-sm">
+                No recommendation right now
+              </p>
+            ) : (
+              <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                {rec.map((r) => (
+                  <div key={r.extractedId} className="flex items-center gap-3">
+                    {/* 20% image */}
+                    <div className="basis-[20%] shrink-0">
+                      {r.img ? (
+                        <img
+                          src={r.img}
+                          alt=""
+                          className="w-full aspect-square object-cover rounded"
+                        />
+                      ) : (
+                        <div className="w-full aspect-square bg-gray-800 rounded" />
+                      )}
+                    </div>
+
+                    {/* 60% details */}
+                    <div className="basis-[60%] min-w-0">
+                      <p className="text-white text-sm truncate">{r.title}</p>
+                      <p className="text-xs text-gray-400">
+                        Score: {r.score.toFixed(1)}
+                      </p>
+                    </div>
+
+                    {/* 20% action */}
+                    <div className="basis-[20%] shrink-0 flex justify-end">
+                      <AnimatedButton
+                        variant="green"
+                        shine={false}
+                        tiltOnClick
+                        cursorFollow
+                        darkBg
+                        disabled={addLoading}
+                        className="p-2 aspect-square"
+                        onClick={() => addRecommendationToQueue(r.extractedId)}
+                      >
+                        {addLoading ? (
+                          <RotateCw className="w-4 h-4 animate-spin [animation-duration:1.8s]" />
+                        ) : (
+                          <ListStart className="w-4 h-4" />
+                        )}
+                      </AnimatedButton>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          <ListCard
-            title="Trending Now"
-            items={trending}
-            loading={trendingLoading}
-            onRefresh={() => loadTrending()}
-          />
-        </div> */}
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-2 space-y-2">
@@ -128,67 +213,6 @@ export default function RoomAnalyticsPage({
             loading={yourTopLikedLoading}
             onRefresh={() => loadYourTop()}
           />
-        </div>
-
-        <div className="grid grid-cols-1 gap-4">
-          <div className="bg-gray-900 border border-gray-800 rounded p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="flex items-center gap-4 min-w-0">
-              {rec?.img ? (
-                <img src={rec.img} className="w-16 h-16 object-cover rounded" />
-              ) : (
-                <div className="w-16 h-16 bg-gray-800 rounded" />
-              )}
-              <div className="min-w-0">
-                <p className="text-white font-semibold">Best Song to Add Now</p>
-                <p className="text-gray-300 text-sm truncate">
-                  {recLoading
-                    ? "Loading..."
-                    : rec
-                    ? rec.title
-                    : "No recommendation right now"}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <AnimatedButton
-                variant="purple"
-                shine={false}
-                tiltOnClick={true}
-                floatingIcon={false}
-                cursorFollow={true}
-                darkBg={false}
-                disabled={recLoading}
-                className="p-2 aspect-square"
-                onClick={() => loadRecommendation()}
-              >
-                <RotateCw
-                  className={`w-4 h-4 ${
-                    recLoading ? "animate-spin [animation-duration:1.8s]" : ""
-                  }`}
-                />
-              </AnimatedButton>
-
-              <AnimatedButton
-                variant="green"
-                shine={false}
-                tiltOnClick={true}
-                floatingIcon={false}
-                cursorFollow={true}
-                darkBg={true}
-                disabled={addLoading || !rec}
-                className="p-2 aspect-square"
-                onClick={() =>
-                  rec?.extractedId && addRecommendationToQueue(rec.extractedId)
-                }
-              >
-                {addLoading ? (
-                  <RotateCw className="w-4 h-4 animate-spin [animation-duration:1.8s]" />
-                ) : (
-                  <ListStart className="w-4 h-4" />
-                )}
-              </AnimatedButton>
-            </div>
-          </div>
         </div>
       </div>
       <ToastContainer position="top-right" autoClose={3000} theme="dark" />

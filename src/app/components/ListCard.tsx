@@ -42,7 +42,7 @@ export default function ListCard({
             </Button>
           ) : null}
         </div>
-        <div className="space-y-3">
+        <div className="space-y-3 max-h-64 lg:max-h-72 overflow-y-auto pr-1 scroll-area">
           {loading ? (
             <>
               <div className="h-4 rounded bg-gray-800 animate-pulse" />

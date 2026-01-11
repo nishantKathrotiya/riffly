@@ -87,7 +87,6 @@
   --accent: #7c3aed; /* default purple */
   --shadow-color: rgba(124, 58, 237, 0.25);
 
-  padding: 0.65rem 1.25rem;
   border-radius: 0.75rem;
   font-weight: 600;
   color: white;
@@ -251,5 +250,46 @@
   .animated-btn::after {
     animation: none;
     transition: none;
+  }
+}
+
+/* ============================= */
+/* SCROLL AREA: hide by default, fade thumb on hover */
+.scroll-area {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: transparent transparent; /* hidden by default */
+}
+.scroll-area:hover {
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+.scroll-area::-webkit-scrollbar {
+  width: 6px;
+}
+.scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scroll-area::-webkit-scrollbar-thumb {
+  background-color: transparent; /* hidden by default */
+  border-radius: 9999px;
+}
+.scroll-area:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Add this to your globals.css */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Better scrolling on mobile */
+@media (max-width: 768px) {
+  html {
+    height: 100%;
+    overflow: hidden;
+  }
+  body {
+    height: 100%;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }

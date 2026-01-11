@@ -38,9 +38,6 @@ export async function GET(req: NextRequest) {
       base.setUTCDate(base.getUTCDate() - dow);
       base.setUTCHours(0, 0, 0, 0);
       sunday = base;
-    } else {
-      // normalize to start-of-day UTC just in case
-      sunday.setUTCHours(0, 0, 0, 0);
     }
     const saturdayEnd = new Date(sunday.getTime() + 7 * 24 * 3600 * 1000); // exclusive
 
@@ -54,17 +51,11 @@ export async function GET(req: NextRequest) {
     });
 
     const counts = Array(7).fill(0) as number[];
+    const dayMs = 24 * 3600 * 1000;
     for (const s of streams) {
-      const d = new Date(s.createAt);
-      // index relative to provided weekStart boundary (UTC)
-      const dayStartUtc = Date.UTC(
-        d.getUTCFullYear(),
-        d.getUTCMonth(),
-        d.getUTCDate()
-      );
-      const idx = Math.floor(
-        (dayStartUtc - sunday.getTime()) / (24 * 3600 * 1000)
-      );
+      const t = new Date(s.createAt).getTime();
+      // index relative to exact UTC instant provided by client as weekStart
+      const idx = Math.floor((t - sunday.getTime()) / dayMs);
       if (idx >= 0 && idx < 7) counts[idx] += 1;
     }
 

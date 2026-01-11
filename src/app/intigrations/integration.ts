@@ -111,22 +111,21 @@ export type Recommendation = {
   img?: string | null;
   score: number;
   parts?: { user: number; room: number; time: number };
-} | null;
+};
 
 export async function getRecommendation(
   roomId: string
-): Promise<Recommendation> {
+): Promise<Recommendation[]> {
   const res = await fetch(`/api/analytics/recommendation?roomId=${roomId}`);
   const data = await jsonOrThrow(res);
-  const r = data?.recommendation;
-  if (!r) return null;
-  return {
+  const arr = Array.isArray(data?.recommendations) ? data.recommendations : [];
+  return arr.map((r: any) => ({
     extractedId: r.extractedId,
     title: r.sample?.title ?? r.extractedId,
     img: r.sample?.smallImg ?? r.sample?.bigImg ?? null,
     score: typeof r.score === "number" ? r.score : 0,
     parts: r.parts ?? undefined,
-  };
+  }));
 }
 
 export async function addToQueue(roomId: string, extractedId: string) {

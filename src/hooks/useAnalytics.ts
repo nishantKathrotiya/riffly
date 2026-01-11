@@ -43,15 +43,14 @@ export function useAnalytics(roomId: string | null) {
   // Recommendation
   const [recLoading, setRecLoading] = useState(false);
   const [addLoading, setAddLoading] = useState(false);
-  const [rec, setRec] = useState<Recommendation>(null);
+  const [rec, setRec] = useState<Recommendation[]>([]);
 
+  // Use LOCAL timezone for week computations so UI picker and initial state align
   function sundayOf(date: Date) {
-    const d = new Date(
-      Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
-    );
-    const dow = d.getUTCDay();
-    d.setUTCDate(d.getUTCDate() - dow);
-    d.setUTCHours(0, 0, 0, 0);
+    const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const dow = d.getDay();
+    d.setDate(d.getDate() - dow); // move to local Sunday
+    d.setHours(0, 0, 0, 0); // local midnight
     return d;
   }
   function iso(d: Date) {
@@ -59,7 +58,7 @@ export function useAnalytics(roomId: string | null) {
   }
   function addDays(d: Date, n: number) {
     const x = new Date(d);
-    x.setUTCDate(x.getUTCDate() + n);
+    x.setDate(x.getDate() + n);
     return x;
   }
   const setWeek = useCallback((d: Date) => setWeekStart(d), []);
@@ -167,7 +166,7 @@ export function useAnalytics(roomId: string | null) {
     setRecLoading(true);
     try {
       const r = await getRecommendation(roomId);
-      setRec(r);
+      setRec(Array.isArray(r) ? r : []);
     } finally {
       setRecLoading(false);
     }

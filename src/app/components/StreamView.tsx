@@ -40,6 +40,7 @@ import {
   removeStream as removeStreamApi,
 } from "@/src/app/intigrations/streams";
 import { AnimatedButton } from "./AnimatedButtonProps";
+import clsx from "clsx";
 
 interface Video {
   id: string;
@@ -249,132 +250,51 @@ export default function StreamView({
       <Appbar />
       <div className="flex justify-center">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-5 w-screen max-w-screen-xl pt-8">
-          <div className="col-span-3">
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-white">
-                  Upcoming Songs
-                </h2>
-                <div className="space-x-2 flex items-center">
-                  {/* Analytics Redirect BTN  */}
-                  <AnimatedButton
-                    variant="purple"
-                    icon={<Sparkles className="w-4 h-4 fill-white" />}
-                    shine
-                    tiltOnClick
-                    cursorFollow
-                    darkBg
-                    floatingIcon
-                    onClick={handleRedirectToAnalytics}
-                  >
-                    Insights
-                  </AnimatedButton>
-
-                  {/* Share BTN  */}
-                  <AnimatedButton
-                    variant="purple"
-                    icon={<Share2 className="w-4 h-4" />}
-                    shine={false}
-                    tiltOnClick
-                    cursorFollow={true}
-                    onClick={handleShare}
-                  >
-                    Share
-                  </AnimatedButton>
-
-                  {/* Empty Queue BTN */}
-                  {isCreator && (
-                    <AnimatedButton
-                      variant="red"
-                      icon={<Trash2 className="w-4 h-4" />}
-                      shine={false}
-                      tiltOnClick
-                      cursorFollow={true}
-                      onClick={() => setIsEmptyQueueDialogOpen(true)}
-                    >
-                      Empty Queue
-                    </AnimatedButton>
-                  )}
-                </div>
-              </div>
-              {queue.length === 0 && (
-                <Card className="bg-gray-900 border-gray-800 w-full">
-                  <CardContent className="p-4">
-                    <p className="text-center py-8 text-gray-400">
-                      No videos in queue
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-              {queue.map((video) => (
-                <Card key={video.id} className="bg-gray-900 border-gray-800">
-                  <CardContent className="p-4 flex items-center space-x-4">
-                    <img
-                      src={video.smallImg}
-                      alt={`Thumbnail for ${video.title}`}
-                      className="w-30 h-20 object-cover rounded"
-                    />
-                    <div className="flex flex-col w-full">
-                      <div className="flex flex-row">
-                        <div className="flex-grow">
-                          <h3 className="font-semibold text-white">
-                            {video.title}
-                          </h3>
-                          <div className="flex items-end space-x-2 mt-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() =>
-                                handleVote(video.id, !video.haveUpvoted)
-                              }
-                              className="flex items-center space-x-1 bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
-                            >
-                              {video.haveUpvoted ? (
-                                <ChevronDown className="h-4 w-4" />
-                              ) : (
-                                <ChevronUp className="h-4 w-4" />
-                              )}
-                              <span>{video.upvotes}</span>
-                            </Button>
-                          </div>
-                        </div>
-                        {isCreator && (
-                          <>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => removeSong(video.id)}
-                              className="bg-red-600 hover:bg-red-700 text-white p-0 aspect-square"
-                            >
-                              <Trash2 className="w-4 h-4 p-0 m-0 hover:outline-white hover:outline-2 border-white" />
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                      <p className="text-gray-400 text-xs text-right h-[10%]">
-                        Added by : {video?.addedBy?.email}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-          <div className="col-span-2">
-            <div className="max-w-4xl mx-auto p-4 space-y-6 w-full">
-              <div className="flex justify-between items-center">
-                <h1 className="text-xl font-bold text-white">Add a song</h1>
-              </div>
-              <form onSubmit={handleSubmit} className="space-y-2">
-                <Input
-                  type="text"
-                  placeholder="Paste YouTube link here"
-                  value={inputLink}
-                  onChange={(e) => setInputLink(e.target.value)}
-                  className="bg-gray-900 text-white border-gray-700 placeholder-gray-500"
+          <div className="col-span-2 p-4">
+            <div className="flex justify-between items-center mb-3">
+              <h1 className="text-2xl font-bold text-white">
+                Welcome to Riffly
+              </h1>
+              <div className="flex items-center gap-2">
+                {/* Analytics Redirect BTN  */}
+                <AnimatedButton
+                  variant="purple"
+                  icon={<Sparkles className="w-4 h-4 fill-white" />}
+                  shine
+                  tiltOnClick
+                  cursorFollow
+                  darkBg
+                  floatingIcon
+                  onClick={handleRedirectToAnalytics}
+                  children={undefined}
                 />
 
-                {/* // Add TO Queue Button */}
+                {/* Share BTN  */}
+                <AnimatedButton
+                  variant="purple"
+                  icon={<Share2 className="w-4 h-4" />}
+                  shine={false}
+                  tiltOnClick
+                  cursorFollow={true}
+                  onClick={handleShare}
+                  children={undefined}
+                />
+              </div>
+            </div>
+            <form
+              onSubmit={handleSubmit}
+              className="flex items-center justify-between gap-2"
+            >
+              <Input
+                type="text"
+                placeholder="Paste YouTube link here"
+                value={inputLink}
+                onChange={(e) => setInputLink(e.target.value)}
+                className="bg-gray-900 text-white border-gray-700 placeholder-gray-500"
+              />
+
+              {/* // Add TO Queue Button */}
+              <div className=" flex items-center justify-end h-full">
                 <AnimatedButton
                   variant="green"
                   icon={
@@ -391,66 +311,143 @@ export default function StreamView({
                   cursorFollow={true}
                   type="submit"
                   disabled={loading}
-                  className="w-full flex items-center justify-center"
-                >
-                  Add to Queue
-                </AnimatedButton>
-              </form>
-              {inputLink && inputLink.match(YT_REGEX) && !loading && (
-                <Card className="bg-gray-900 border-gray-800">
-                  <CardContent className="p-4">
-                    <LiteYouTubeEmbed title="" id={inputLink.split("?v=")[1]} />
-                  </CardContent>
-                </Card>
-              )}
-              <div className="space-y-4">
+                  className="flex items-center justify-center"
+                  children={undefined}
+                ></AnimatedButton>
+              </div>
+            </form>
+            {inputLink && inputLink.match(YT_REGEX) && !loading && (
+              <Card className="bg-gray-900 border-gray-800">
+                <CardContent className="p-4">
+                  <LiteYouTubeEmbed title="" id={inputLink.split("?v=")[1]} />
+                </CardContent>
+              </Card>
+            )}
+
+            <div className="max-w-4xl mx-auto w-full mt-6">
+              <div className="flex justify-between items-center mb-3">
                 <h2 className="text-2xl font-bold text-white">Now Playing</h2>
-                <Card className="bg-gray-900 border-gray-800">
-                  <CardContent className="p-4">
-                    {currentVideo ? (
-                      <div>
-                        {playVideo ? (
-                          <div ref={videoPlayerRef} className="w-full" />
-                        ) : (
-                          <>
-                            <img
-                              src={currentVideo.bigImg}
-                              className="w-full h-72 object-cover rounded"
-                              alt={currentVideo.title}
-                            />
-                            <p className="mt-2 text-center font-semibold text-white">
-                              {currentVideo.title}
-                            </p>
-                          </>
-                        )}
-                        <p className="mt-2 text-center text-sm text-gray-400">
-                          Added By : {currentVideo?.addedBy?.email}
+                <AnimatedButton
+                  variant="purple"
+                  icon={<Play className="w-4 h-4" />}
+                  tiltOnClick
+                  cursorFollow
+                  darkBg={true}
+                  disabled={playNextLoader}
+                  onClick={playNext}
+                  className=" flex items-center justify-center"
+                  children={undefined}
+                />
+              </div>
+              <Card className="bg-gray-900 border-gray-800">
+                <CardContent className="p-4 flex flex-row sm:flex-col items-center sm:items-start space-x-3 sm:space-x-0">
+                  {currentVideo ? (
+                    <>
+                      <div
+                        ref={videoPlayerRef}
+                        className="rounded bg-black w-28 h-16 sm:w-full sm:h-72 flex-shrink-0"
+                      />
+
+                      {/* Make sure this div limits width on large screens */}
+                      <div className="flex flex-col overflow-hidden max-w-full">
+                        <h3 className="font-semibold text-white text-sm sm:text-lg truncate whitespace-nowrap">
+                          {currentVideo.title}
+                        </h3>
+                        <p className="text-gray-400 text-xs sm:text-sm mt-1 truncate whitespace-nowrap">
+                          Added by: {currentVideo?.addedBy?.email}
                         </p>
                       </div>
-                    ) : (
-                      <p className="text-center py-8 text-gray-400">
-                        No video playing
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
-                {playVideo && (
-                  //  PLay next
+                    </>
+                  ) : (
+                    <p className="text-center py-8 text-gray-400">
+                      No video playing
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          <div className="col-span-3 p-4">
+            <div className="flex justify-between items-center mb-3">
+              <h2 className="text-2xl font-bold text-white">Upcoming Songs</h2>
+              <div className="flex items-center">
+                {/* Empty Queue BTN */}
+                {isCreator && (
                   <AnimatedButton
-                    variant="purple"
-                    icon={<Play className="w-4 h-4" />}
+                    variant="red"
+                    icon={<Trash2 className="w-4 h-4" />}
+                    shine={false}
                     tiltOnClick
-                    cursorFollow
-                    darkBg={true}
-                    disabled={playNextLoader}
-                    onClick={playNext}
-                    className="w-full flex items-center justify-center"
-                  >
-                    {playNextLoader ? "Loading..." : "Play Next"}
-                  </AnimatedButton>
+                    cursorFollow={true}
+                    onClick={() => setIsEmptyQueueDialogOpen(true)}
+                    children={undefined}
+                  />
                 )}
               </div>
             </div>
+
+            {queue.length === 0 && (
+              <Card className="bg-gray-900 border-gray-800 w-full">
+                <CardContent className="p-4">
+                  <p className="text-center py-8 text-gray-400">
+                    No videos in queue
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+            {queue.map((video) => (
+              <Card key={video.id} className="bg-gray-900 border-gray-800">
+                <CardContent className="p-4 flex items-center space-x-4">
+                  <img
+                    src={video.smallImg}
+                    alt={`Thumbnail for ${video.title}`}
+                    className="w-30 h-20 object-cover rounded"
+                  />
+                  <div className="flex flex-col w-full">
+                    <div className="flex flex-row">
+                      <div className="flex-grow">
+                        <h3 className="font-semibold text-white">
+                          {video.title}
+                        </h3>
+                        <div className="flex items-end space-x-2 mt-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              handleVote(video.id, !video.haveUpvoted)
+                            }
+                            className="flex items-center space-x-1 bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
+                          >
+                            {video.haveUpvoted ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronUp className="h-4 w-4" />
+                            )}
+                            <span>{video.upvotes}</span>
+                          </Button>
+                        </div>
+                      </div>
+                      {isCreator && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => removeSong(video.id)}
+                            className="bg-red-600 hover:bg-red-700 text-white p-0 aspect-square"
+                          >
+                            <Trash2 className="w-4 h-4 p-0 m-0 hover:outline-white hover:outline-2 border-white" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                    <p className="text-gray-400 text-xs text-right h-[10%]">
+                      Added by : {video?.addedBy?.email}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </div>

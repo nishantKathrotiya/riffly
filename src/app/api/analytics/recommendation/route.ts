@@ -136,18 +136,15 @@ export async function GET(req: NextRequest) {
     });
 
     scored.sort((a, b) => b.score - a.score);
-    const best = scored[0] || null;
+    const top = scored.slice(0, 5);
+    const payload = top.map((r) => ({
+      extractedId: r.extractedId,
+      score: r.score,
+      parts: r.parts,
+      sample: sampleByEx.get(r.extractedId) || null,
+    }));
 
-    const payload = best
-      ? {
-          extractedId: best.extractedId,
-          score: best.score,
-          parts: best.parts,
-          sample: sampleByEx.get(best.extractedId) || null,
-        }
-      : null;
-
-    return NextResponse.json({ roomId, recommendation: payload });
+    return NextResponse.json({ roomId, recommendations: payload });
   } catch (e) {
     console.error("/api/analytics/recommendation error", e);
     return NextResponse.json({ message: "Error" }, { status: 500 });

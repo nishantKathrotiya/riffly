@@ -55,10 +55,10 @@ export default function WeeklyAddsChart({
             />
           )}
         </div>
-        <div className="grid grid-cols-7 gap-3 items-end h-48">
+        <div className="grid grid-cols-7 gap-3 items-end h-64 lg:h-72">
           {labels.map((label, i) => {
             const v = counts?.[i] ?? 0;
-            const h = max > 0 ? Math.max(6, Math.round((v / max) * 140)) : 6;
+            const h = max > 0 ? Math.max(6, Math.round((v / max) * 200)) : 6;
             return (
               <div key={i} className="flex flex-col items-center gap-2">
                 <div className="relative group">

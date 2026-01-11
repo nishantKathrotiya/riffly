@@ -49,7 +49,7 @@ export function AnimatedButton({
         btn.style.setProperty("--y", `${y}%`);
       }}
       className={clsx(
-        "animated-btn",
+        "animated-btn p-2.5",
         `animated-btn--${variant}`,
         shine && "animated-btn--shine",
         tiltOnClick && "animated-btn--tilt",
