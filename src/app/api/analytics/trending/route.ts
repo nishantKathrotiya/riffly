@@ -29,15 +29,23 @@ export async function GET(req: NextRequest) {
     }
 
     const rows = await prismaClient.roomStreamTrending.findMany({
-      where: { roomId },
+      where: {
+        roomId,
+        trendingScore: { gt: 0 },
+      },
       orderBy: [{ trendingScore: "desc" }, { lastUpdated: "desc" }],
       take: limit,
     });
 
-    const streamIds = rows.map((r) => r.streamId).filter(Boolean);
-    const streams = streamIds.length
+    const extractedIds = rows.map((r) => r.extractedId);
+
+    const streams = extractedIds.length
       ? await prismaClient.stream.findMany({
-          where: { id: { in: streamIds } },
+          where: {
+            userId: roomId,
+            extractedId: { in: extractedIds },
+          },
+          orderBy: { createAt: "desc" },
           select: {
             id: true,
             extractedId: true,
@@ -49,10 +57,11 @@ export async function GET(req: NextRequest) {
         })
       : [];
 
-    const byId = new Map(streams.map((s) => [s.id, s]));
+    const streamByExtractedId = new Map(streams.map((s) => [s.extractedId, s]));
+
     const data = rows.map((r) => ({
       ...r,
-      stream: byId.get(r.streamId) || null,
+      stream: streamByExtractedId.get(r.extractedId) ?? null,
     }));
 
     return NextResponse.json({ roomId, items: data });

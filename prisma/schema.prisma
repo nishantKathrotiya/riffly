@@ -59,10 +59,10 @@ model Upvote {
 model UserRoomStats {
   userId          String
   roomId          String
-  totalAdded      Int
-  totalLikesGot   Int
-  totalLikesGiven Int
-  lastUpdated     DateTime
+  totalAdded      Int      @default(0)
+  totalLikesGot   Int      @default(0)
+  totalLikesGiven Int      @default(0)
+  lastUpdated     DateTime @updatedAt
 
   @@id([userId, roomId])
 }
@@ -70,15 +70,18 @@ model UserRoomStats {
 model RoomStreamTrending {
   id            String   @id @default(uuid())
   roomId        String
-  streamId      String
   extractedId   String
-  recentUpvotes Int
-  recentPlays   Int
-  trendingScore Float
-  lastUpdated   DateTime
 
+  recentUpvotes Int      @default(0)
+  recentPlays   Int      @default(0)
+  trendingScore Float    @default(0)
+  lastUpdated   DateTime @updatedAt
+
+  @@unique([roomId, extractedId], name: "roomId_extractedId")
   @@index([roomId, trendingScore])
 }
+
+
 
 enum StreamType {
   Spotify

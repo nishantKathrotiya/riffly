@@ -327,17 +327,19 @@ export default function StreamView({
             <div className="max-w-4xl mx-auto w-full mt-6">
               <div className="flex justify-between items-center mb-3">
                 <h2 className="text-2xl font-bold text-white">Now Playing</h2>
-                <AnimatedButton
-                  variant="purple"
-                  icon={<Play className="w-4 h-4" />}
-                  tiltOnClick
-                  cursorFollow
-                  darkBg={true}
-                  disabled={playNextLoader}
-                  onClick={playNext}
-                  className=" flex items-center justify-center"
-                  children={undefined}
-                />
+                {isCreator && (
+                  <AnimatedButton
+                    variant="purple"
+                    icon={<Play className="w-4 h-4" />}
+                    tiltOnClick
+                    cursorFollow
+                    darkBg={true}
+                    disabled={playNextLoader}
+                    onClick={playNext}
+                    className=" flex items-center justify-center"
+                    children={undefined}
+                  />
+                )}
               </div>
               <Card className="bg-gray-900 border-gray-800">
                 <CardContent className="p-4 flex flex-row sm:flex-col items-center sm:items-start space-x-3 sm:space-x-0">

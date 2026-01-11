@@ -76,25 +76,22 @@ export async function POST(req: NextRequest) {
             },
           }),
           // Trending: increment recentUpvotes and recompute score
-          prismaClient.roomStreamTrending.upsert({
-            where: { id: stream.id },
+          await prismaClient.roomStreamTrending.upsert({
+            where: {
+              roomId_extractedId: {
+                roomId,
+                extractedId: stream.extractedId,
+              },
+            },
             update: {
-              roomId,
-              streamId: stream.id,
-              extractedId: stream.extractedId,
               recentUpvotes: { increment: 1 },
-              trendingScore: undefined as unknown as number, // placeholder, set below
-              lastUpdated: now,
+              trendingScore: { increment: 2 },
             },
             create: {
-              id: stream.id,
               roomId,
-              streamId: stream.id,
               extractedId: stream.extractedId,
               recentUpvotes: 1,
-              recentPlays: 0,
               trendingScore: 2,
-              lastUpdated: now,
             },
           }),
         ]);

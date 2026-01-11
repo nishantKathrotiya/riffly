@@ -205,29 +205,18 @@ export async function POST(req: NextRequest) {
       // 2) Initialize trending row for this stream
       await prismaClient.roomStreamTrending.upsert({
         where: {
-          // No unique on (roomId, streamId), so emulate with id via find/create
-          // We upsert by creating a deterministic id fallback is not possible; instead do: if not found, create
-          // Use a composite via findFirst+create alternative
-          id: stream.id, // fallback: ensure unique via stream.id as id when created
+          roomId_extractedId: {
+            roomId: data.creatorId,
+            extractedId,
+          },
         },
         update: {
-          roomId: data.creatorId,
-          streamId: stream.id,
-          extractedId: stream.extractedId,
-          recentUpvotes: 0,
-          recentPlays: 0,
-          trendingScore: 0,
-          lastUpdated: now,
+          trendingScore: { increment: 1 },
         },
         create: {
-          id: stream.id,
           roomId: data.creatorId,
-          streamId: stream.id,
-          extractedId: stream.extractedId,
-          recentUpvotes: 0,
-          recentPlays: 0,
-          trendingScore: 0,
-          lastUpdated: now,
+          extractedId,
+          trendingScore: 1,
         },
       });
     } catch (err) {
