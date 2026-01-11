@@ -43,70 +43,102 @@ export async function POST(req: NextRequest) {
     try {
       const stream = await prismaClient.stream.findUnique({
         where: { id: data.streamId },
-        select: { userId: true, addedById: true, id: true, extractedId: true },
+        select: {
+          userId: true, // roomId
+          addedById: true, // song owner
+          extractedId: true,
+        },
       });
-      if (stream) {
-        const roomId = stream.userId;
-        const ownerId = stream.addedById;
-        const now = new Date();
 
-        // Fetch current trending row to compute decremented values safely
-        const t = await prismaClient.roomStreamTrending.findUnique({
-          where: { id: stream.id },
-        });
-        const currentUp = t?.recentUpvotes ?? 0;
-        const currentPlays = t?.recentPlays ?? 0;
-        const nextUp = currentUp > 0 ? currentUp - 1 : 0;
-        const newScore = nextUp * 2 + currentPlays;
+      if (!stream) return;
 
-        await Promise.all([
-          prismaClient.userRoomStats.upsert({
-            where: { userId_roomId: { userId: user.id, roomId } },
-            update: { totalLikesGiven: { decrement: 1 }, lastUpdated: now },
-            create: {
-              userId: user.id,
+      const roomId = stream.userId;
+      const ownerId = stream.addedById;
+      const extractedId = stream.extractedId;
+      const now = new Date();
+
+      // Fetch current trending stats for this song in this room
+      const trending = await prismaClient.roomStreamTrending.findUnique({
+        where: {
+          roomId_extractedId: {
+            roomId,
+            extractedId,
+          },
+        },
+        select: {
+          recentUpvotes: true,
+          recentPlays: true,
+        },
+      });
+
+      const currentUpvotes = trending?.recentUpvotes ?? 0;
+      const currentPlays = trending?.recentPlays ?? 0;
+
+      const nextUpvotes = Math.max(0, currentUpvotes - 1);
+      const newScore = nextUpvotes * 2 + currentPlays;
+
+      await Promise.all([
+        // User who downvoted
+        prismaClient.userRoomStats.upsert({
+          where: {
+            userId_roomId: { userId: user.id, roomId },
+          },
+          update: {
+            totalLikesGiven: { decrement: 1 },
+            lastUpdated: now,
+          },
+          create: {
+            userId: user.id,
+            roomId,
+            totalAdded: 0,
+            totalLikesGot: 0,
+            totalLikesGiven: 0,
+            lastUpdated: now,
+          },
+        }),
+
+        // Song owner
+        prismaClient.userRoomStats.upsert({
+          where: {
+            userId_roomId: { userId: ownerId, roomId },
+          },
+          update: {
+            totalLikesGot: { decrement: 1 },
+            lastUpdated: now,
+          },
+          create: {
+            userId: ownerId,
+            roomId,
+            totalAdded: 0,
+            totalLikesGot: 0,
+            totalLikesGiven: 0,
+            lastUpdated: now,
+          },
+        }),
+
+        // Trending aggregation (song-level)
+        prismaClient.roomStreamTrending.upsert({
+          where: {
+            roomId_extractedId: {
               roomId,
-              totalAdded: 0,
-              totalLikesGot: 0,
-              totalLikesGiven: 0,
-              lastUpdated: now,
+              extractedId,
             },
-          }),
-          prismaClient.userRoomStats.upsert({
-            where: { userId_roomId: { userId: ownerId, roomId } },
-            update: { totalLikesGot: { decrement: 1 }, lastUpdated: now },
-            create: {
-              userId: ownerId,
-              roomId,
-              totalAdded: 0,
-              totalLikesGot: 0,
-              totalLikesGiven: 0,
-              lastUpdated: now,
-            },
-          }),
-          prismaClient.roomStreamTrending.upsert({
-            where: { id: stream.id },
-            update: {
-              roomId,
-              streamId: stream.id,
-              extractedId: stream.extractedId,
-              recentUpvotes: nextUp,
-              trendingScore: newScore,
-              lastUpdated: now,
-            },
-            create: {
-              id: stream.id,
-              roomId,
-              streamId: stream.id,
-              extractedId: stream.extractedId,
-              recentUpvotes: 0,
-              recentPlays: 0,
-              trendingScore: 0,
-              lastUpdated: now,
-            },
-          }),
-        ]);
-      }
+          },
+          update: {
+            recentUpvotes: nextUpvotes,
+            trendingScore: newScore,
+            lastUpdated: now,
+          },
+          create: {
+            roomId,
+            extractedId,
+            recentUpvotes: 0,
+            recentPlays: 0,
+            trendingScore: 0,
+            lastUpdated: now,
+          },
+        }),
+      ]);
     } catch (err) {
       console.error("Analytics update failed on downvote", err);
     }

@@ -4,8 +4,6 @@ import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Card, CardContent } from "@/src/components/ui/card";
 import {
-  ChevronUp,
-  ChevronDown,
   Share2,
   Play,
   Sparkles,
@@ -13,6 +11,7 @@ import {
   ListStart,
   RotateCw,
 } from "lucide-react";
+import { LikeButton } from "./LikeButton";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Appbar } from "./Appbar";
@@ -407,7 +406,7 @@ export default function StreamView({
               </Card>
             )}
             {queue.map((video) => (
-              <Card key={video.id} className="bg-gray-900 border-gray-800">
+              <Card key={video.id} className="bg-gray-900 border-gray-800 mb-2">
                 <CardContent className="p-4 flex items-center space-x-4">
                   <img
                     src={video.smallImg}
@@ -420,22 +419,14 @@ export default function StreamView({
                         <h3 className="font-semibold text-white">
                           {video.title}
                         </h3>
-                        <div className="flex items-end space-x-2 mt-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              handleVote(video.id, !video.haveUpvoted)
-                            }
-                            className="flex items-center space-x-1 bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
-                          >
-                            {video.haveUpvoted ? (
-                              <ChevronDown className="h-4 w-4" />
-                            ) : (
-                              <ChevronUp className="h-4 w-4" />
-                            )}
-                            <span>{video.upvotes}</span>
-                          </Button>
+                        <div className="mt-2">
+                          <LikeButton
+                            isLiked={video.haveUpvoted}
+                            likeCount={video.upvotes}
+                            onLike={() => handleVote(video.id, true)}
+                            onUnlike={() => handleVote(video.id, false)}
+                            className="mt-1"
+                          />
                         </div>
                       </div>
                       {isCreator && (
