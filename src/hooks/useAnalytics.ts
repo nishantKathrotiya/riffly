@@ -45,6 +45,46 @@ export function useAnalytics(roomId: string | null) {
   const [addLoading, setAddLoading] = useState(false);
   const [rec, setRec] = useState<Recommendation>(null);
 
+  function sundayOf(date: Date) {
+    const d = new Date(
+      Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
+    );
+    const dow = d.getUTCDay();
+    d.setUTCDate(d.getUTCDate() - dow);
+    d.setUTCHours(0, 0, 0, 0);
+    return d;
+  }
+  function iso(d: Date) {
+    return d.toISOString();
+  }
+  function addDays(d: Date, n: number) {
+    const x = new Date(d);
+    x.setUTCDate(x.getUTCDate() + n);
+    return x;
+  }
+  const setWeek = useCallback((d: Date) => setWeekStart(d), []);
+
+  // state: selected week
+  const [weekStart, setWeekStart] = useState<Date>(() => sundayOf(new Date()));
+  const weekEnd = useMemo(() => addDays(weekStart, 6), [weekStart]);
+
+  // prevent going to future weeks
+  const canGoNext = useMemo(() => {
+    const currentWeekStart = sundayOf(new Date());
+    return weekStart < currentWeekStart;
+  }, [weekStart]);
+
+  // navigation actions
+  const prevWeek = useCallback(() => setWeekStart((d) => addDays(d, -7)), []);
+  const nextWeek = useCallback(
+    () => setWeekStart((d) => (canGoNext ? addDays(d, 7) : d)),
+    [canGoNext]
+  );
+  const resetToCurrentWeek = useCallback(
+    () => setWeekStart(sundayOf(new Date())),
+    []
+  );
+
   // Loaders
   const loadStats = useCallback(async () => {
     if (!roomId) return;
@@ -62,11 +102,12 @@ export function useAnalytics(roomId: string | null) {
     }
   }, [roomId]);
 
+  // modify loadWeekly to pass weekStart
   const loadWeekly = useCallback(async () => {
     if (!roomId) return;
     setWeeklyLoading(true);
     try {
-      const data = await getWeeklyAdds(roomId);
+      const data = await getWeeklyAdds(roomId, iso(weekStart));
       setWeekly(
         Array.isArray(data.counts) && data.counts.length === 7
           ? data.counts
@@ -75,7 +116,7 @@ export function useAnalytics(roomId: string | null) {
     } finally {
       setWeeklyLoading(false);
     }
-  }, [roomId]);
+  }, [roomId, weekStart]);
 
   const loadTrending = useCallback(async () => {
     if (!roomId) return;
@@ -147,9 +188,9 @@ export function useAnalytics(roomId: string | null) {
   );
 
   const refreshAll = useCallback(async () => {
+    // Intentionally exclude loadWeekly so week changes don't retrigger all APIs.
     await Promise.all([
       loadStats(),
-      loadWeekly(),
       loadTrending(),
       loadLikesGiven(),
       loadYouAdd(),
@@ -158,7 +199,6 @@ export function useAnalytics(roomId: string | null) {
     ]);
   }, [
     loadStats,
-    loadWeekly,
     loadTrending,
     loadLikesGiven,
     loadYouAdd,
@@ -171,6 +211,11 @@ export function useAnalytics(roomId: string | null) {
     if (!roomId) return;
     refreshAll();
   }, [roomId, refreshAll]);
+
+  // trigger weekly reload when week changes
+  useEffect(() => {
+    if (roomId) loadWeekly();
+  }, [roomId, weekStart, loadWeekly]);
 
   return {
     // Data
@@ -200,5 +245,13 @@ export function useAnalytics(roomId: string | null) {
     loadRecommendation,
     addRecommendationToQueue,
     refreshAll,
+
+    weekStart,
+    weekEnd,
+    canGoNext,
+    prevWeek,
+    nextWeek,
+    resetToCurrentWeek,
+    setWeek,
   };
 }

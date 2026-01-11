@@ -8,6 +8,7 @@ import { Button } from "@/src/components/ui/button";
 import { ToastContainer } from "react-toastify";
 import { ListStart, RotateCw, ArrowLeft } from "lucide-react";
 import { AnimatedButton } from "@/src/app/components/AnimatedButtonProps";
+import WeekPickerPrebuilt from "@/src/app/components/WeekPicker";
 
 export default function RoomAnalyticsPage({
   params,
@@ -37,6 +38,13 @@ export default function RoomAnalyticsPage({
     loadLikesGiven,
     loadYouAdd,
     loadYourTop,
+    weekStart,
+    weekEnd,
+    canGoNext,
+    prevWeek,
+    nextWeek,
+    resetToCurrentWeek,
+    setWeek,
   } = useAnalytics(roomId);
 
   return (
@@ -66,10 +74,33 @@ export default function RoomAnalyticsPage({
           avgLikes={stats?.avgLikes ?? 0}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-2">
             <WeeklyAddsChart counts={weekly} loading={weeklyLoading} />
           </div>
+          <ListCard
+            title="Trending Now"
+            items={trending}
+            loading={trendingLoading}
+            onRefresh={() => loadTrending()}
+          />
+        </div> */}
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-2 space-y-2">
+            <WeeklyAddsChart
+              counts={weekly}
+              loading={weeklyLoading}
+              weekStart={weekStart?.toISOString()}
+              weekEnd={weekEnd?.toISOString()}
+              canGoNext={canGoNext}
+              onPrev={prevWeek}
+              onNext={nextWeek}
+              onPickDate={(sunday) => setWeek(sunday)}
+              onReset={resetToCurrentWeek}
+            />
+          </div>
+
           <ListCard
             title="Trending Now"
             items={trending}

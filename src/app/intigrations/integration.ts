@@ -21,8 +21,20 @@ export async function getStats(roomId: string) {
   return jsonOrThrow(res);
 }
 
-export async function getWeeklyAdds(roomId: string) {
-  const res = await fetch(`/api/analytics/weekly-adds?roomId=${roomId}`);
+export async function getWeeklyAdds(
+  roomId: string,
+  weekStartISO?: string
+): Promise<{
+  roomId: string;
+  counts: number[];
+  weekStart: string;
+  weekEnd: string;
+}> {
+  const qs = new URLSearchParams({ roomId });
+  if (weekStartISO) qs.set("weekStart", weekStartISO);
+  const res = await fetch(`/api/analytics/weekly-adds?${qs.toString()}`, {
+    cache: "no-store",
+  });
   return jsonOrThrow(res);
 }
 
