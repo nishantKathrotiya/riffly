@@ -13,8 +13,6 @@ const AnimatedNumber = ({ value }: { value: string | number }) => {
   const count = useMotionValue(0);
   const rounded = useTransform(count, Math.round);
   const [isHovered, setIsHovered] = useState(false);
-
-  // Flicker effect values
   const flicker = useAnimation();
 
   useEffect(() => {
@@ -27,19 +25,17 @@ const AnimatedNumber = ({ value }: { value: string | number }) => {
     }
   }, [value]);
 
-  // Flicker effect on hover
-  // Update the flicker effect in the second useEffect
   useEffect(() => {
     if (isHovered) {
       flicker.start({
-        opacity: [0.5, 0, 0.7, 1, 0], // Lower max opacity (less intense flickering)
+        opacity: [0.5, 0, 0.7, 1, 0],
         textShadow: [
-          "0 0 1px #ffffff, 0 0 3px #ffffff, 0 0 6px #ffffff", // Softer shadow
-          "0 0 2px #ffffff, 0 0 5px #ffffff, 0 0 8px #ffffff", // Slightly less intense glow
-          "0 0 1px #ffffff, 0 0 3px #ffffff, 0 0 5px #ffffff", // Subtle shadow and glow
+          "0 0 1px #ffffff, 0 0 3px #ffffff, 0 0 6px #ffffff",
+          "0 0 2px #ffffff, 0 0 5px #ffffff, 0 0 8px #ffffff",
+          "0 0 1px #ffffff, 0 0 3px #ffffff, 0 0 5px #ffffff",
         ],
         transition: {
-          duration: 1, // Slower transition to make flicker less harsh
+          duration: 1,
           repeat: Infinity,
           repeatType: "reverse",
         },
@@ -47,39 +43,18 @@ const AnimatedNumber = ({ value }: { value: string | number }) => {
     } else {
       flicker.start({
         opacity: 1,
-        textShadow: "0 0 2px rgba(240, 240, 240, 0.2)", // Softer glow when not hovered
+        textShadow: "0 0 2px rgba(240, 240, 240, 0.2)",
         transition: { duration: 0.5 },
       });
     }
   }, [isHovered]);
 
-  // Update the motion.span style
-  <motion.span
-    className="relative z-10 text-6xl font-black"
-    animate={flicker}
-    style={{
-      WebkitTextStroke: "1px #ffeb3b", // Yellow outline
-      color: "#fff8c4", // Warm white color
-      display: "inline-block",
-      padding: "0.5rem 1rem",
-      position: "relative",
-      textShadow: "0 0 5px rgba(255, 235, 59, 0.3)", // Initial subtle glow
-    }}
-  >
-    {typeof value === "number" ? <motion.span>{rounded}</motion.span> : value}
-  </motion.span>;
-
   return (
-    <div
-      className="relative"
+    <motion.span
+      className="relative inline-block"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Spider web decoration */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none">
-        <div className="absolute w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPgogIDxwYXR0ZXJuIGlkPSJ3ZWIiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+CiAgICA8cGF0aCBkPSJNIDAgMCBMIDAgNDAgTCA0MCA0MCBMIDQwIDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIiBzdHJva2Utd2lkdGg9IjEiLz4KICAgIDxwYXRoIGQ9Ik0gMCAwIEMgMTAgMTAgMzAgMTAgNDAgMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiIHN0cm9rZS13aWR0aD0iMSIvPgogICAgPHBhdGggZD0iTSA0MCAwIEMgMzAgMTAgMTAgMTAgMCAwIiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4xKSIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgPC9wYXR0ZXJuPgogIDxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjd2ViKSIvPgo8L3N2Zz4=')]" />
-      </div>
-
       <motion.span
         className="relative z-10 text-6xl font-black"
         animate={flicker}
@@ -97,7 +72,7 @@ const AnimatedNumber = ({ value }: { value: string | number }) => {
           value
         )}
       </motion.span>
-    </div>
+    </motion.span>
   );
 };
 
