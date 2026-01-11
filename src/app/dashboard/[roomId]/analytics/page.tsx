@@ -57,13 +57,13 @@ export default function RoomAnalyticsPage({
               <Button
                 variant="ghost"
                 onClick={() => window.history.back()}
-                className="p-1 text-gray-200 hover:bg-transparent hover:text-white"
+                className="p-1 text-gray-200 hover:bg-transparent hover:text-white flex gap-2"
               >
                 <ArrowLeft className="w-5 h-5" />
+                <h1 className="text-xl sm:text-2xl font-bold text-white">
+                  Analytics Dashboard
+                </h1>
               </Button>
-              <h1 className="text-xl sm:text-2xl font-bold text-white">
-                Analytics Dashboard
-              </h1>
             </div>
 
             {/* Right: roomId badge */}
