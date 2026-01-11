@@ -345,10 +345,18 @@ export default function StreamView({
                 <CardContent className="p-4 flex flex-row sm:flex-col items-center sm:items-start space-x-3 sm:space-x-0">
                   {currentVideo ? (
                     <>
-                      <div
-                        ref={videoPlayerRef}
-                        className="rounded bg-black w-28 h-16 sm:w-full sm:h-72 flex-shrink-0"
-                      />
+                      {playVideo ? (
+                        <div
+                          ref={videoPlayerRef}
+                          className="rounded bg-black w-28 h-16 sm:w-full sm:h-72 flex-shrink-0"
+                        />
+                      ) : (
+                        <img
+                          src={currentVideo.bigImg}
+                          className="rounded bg-black w-28 h-16 sm:w-full sm:h-72 flex-shrink-0"
+                          alt={currentVideo.title}
+                        />
+                      )}
 
                       {/* Make sure this div limits width on large screens */}
                       <div className="flex flex-col overflow-hidden max-w-full">
